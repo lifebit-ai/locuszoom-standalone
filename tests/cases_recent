@@ -4,3 +4,8 @@ tests.append(Test(
 title="Highlight gene TCF7L2"
 ));
 
+# Add test for using gencode gene table
+tests.append(Test(
+"--prefix gencode_test --metal tests/data/test_annot_col.txt --gene-table gencode --refgene TCF7L2 --build hg19 --pop EUR --source 1000G_March2012 --markercol SNPID --pvalcol PVAL annotCol=annotation annotPch=15,16,17,18,19 annotOrder=stop,non_syn,intron,syn",
+title = "Testing GENCODE genes instead of refFlat"
+));
