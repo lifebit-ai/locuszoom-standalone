@@ -773,7 +773,7 @@ grid.refsnp <- function(name,pos,pval,draw.name=TRUE,label=NULL,color=NULL,shado
       );
       
     } else {
-      if (require("gridExtra") & shadow) { grob_func = stextGrob }
+      if (FALSE & "gridExtra" %in% installed.packages()[,1] & shadow) { grob_func = stextGrob }
       else { grob_func = textGrob }
 
       refsnp_text = grob_func(
@@ -2695,9 +2695,7 @@ zplot <- function(metal,ld=NULL,recrate=NULL,refidx=NULL,nrugs=0,postlude=NULL,a
 }  ## end zplot
 
 grid.extralog = function(dframe,fudge = 0.63,main = NULL) {
-  suppressPackageStartupMessages(suppressWarnings({ 
-    check = require("gridExtra") 
-  }));
+  check <- "gridExtra" %in% installed.packages()[,1]
   
   if (!check) {
     warning("gridExtra not installed - skipping extra PDF pages for GWAS hits and fine-mapping regions");
@@ -2715,9 +2713,9 @@ grid.extralog = function(dframe,fudge = 0.63,main = NULL) {
     
     # Draw the table. 
     grid.newpage();
-    grid.draw(tableGrob(
-      dsub,
-      show.rownames = F
+    grid.draw(gridExtra::tableGrob(
+      dsub
+      # show.rownames = FALSE ## this is now defunct
     ));
     
     # Draw title if provided. 
