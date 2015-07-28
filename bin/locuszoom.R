@@ -773,7 +773,7 @@ grid.refsnp <- function(name,pos,pval,draw.name=TRUE,label=NULL,color=NULL,shado
       );
       
     } else {
-      if (require("gridExtra") & shadow) { grob_func = stextGrob }
+      if (FALSE & "gridExtra" %in% installed.packages()[,1] & shadow) { grob_func = stextGrob }
       else { grob_func = textGrob }
 
       refsnp_text = grob_func(
@@ -2713,9 +2713,7 @@ draw_table = function(...) {
 }
 
 grid.extralog = function(dframe,fudge = 0.63,main = NULL) {
-  suppressPackageStartupMessages(suppressWarnings({ 
-    check = require("gridExtra") 
-  }));
+  check <- "gridExtra" %in% installed.packages()[,1]
   
   if (!check) {
     warning("gridExtra not installed - skipping extra PDF pages for GWAS hits and fine-mapping regions");
