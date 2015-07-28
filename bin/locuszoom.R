@@ -2700,12 +2700,12 @@ draw_table = function(...) {
   ge_version = as.character(packageVersion("gridExtra"))
   vcomp = compareVersion(ge_version,"2.0.0")
   if (vcomp == -1) {
-    grid.draw(tableGrob(
+    grid.draw(gridExtra::tableGrob(
       ...,
       show.rownames = F
     ))
   } else {
-    grid.draw(tableGrob(
+    grid.draw(gridExtra::tableGrob(
       ...,
       rows = NULL
     ))
