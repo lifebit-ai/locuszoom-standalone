@@ -2694,6 +2694,24 @@ zplot <- function(metal,ld=NULL,recrate=NULL,refidx=NULL,nrugs=0,postlude=NULL,a
 
 }  ## end zplot
 
+# Helper function to draw table grobs on the log page. Prints the table without rownames. 
+# This handles the two different gridExtra package versions with different interfaces. 
+draw_table = function(...) {
+  ge_version = as.character(packageVersion("gridExtra"))
+  vcomp = compareVersion(ge_version,"2.0.0")
+  if (vcomp == -1) {
+    grid.draw(tableGrob(
+      ...,
+      show.rownames = F
+    ))
+  } else {
+    grid.draw(tableGrob(
+      ...,
+      rows = NULL
+    ))
+  }
+}
+
 grid.extralog = function(dframe,fudge = 0.63,main = NULL) {
   suppressPackageStartupMessages(suppressWarnings({ 
     check = require("gridExtra") 
@@ -2715,11 +2733,8 @@ grid.extralog = function(dframe,fudge = 0.63,main = NULL) {
     
     # Draw the table. 
     grid.newpage();
-    grid.draw(tableGrob(
-      dsub,
-      show.rownames = F
-    ));
-    
+    draw_table(dsub);
+
     # Draw title if provided. 
     if (!is.null(main)) {
       grid.text(main,0.5,unit(1,'npc') - unit(1,'lines'));

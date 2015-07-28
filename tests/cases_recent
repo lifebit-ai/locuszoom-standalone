@@ -1,11 +1,6 @@
 
+# GWAS catalog tests
 tests.append(Test(
-"--prefix new_req_gene_test2 --epacts tests/data/test_epacts_with_annot_col.epacts.gz --refsnp rs7903146 --flank 1MB --gene-table gencode --build hg19 --pop EUR --source 1000G_March2012 requiredGene=TCF7L2,CASP7 hiRequiredGene=T annotCol=ANNOT annotPch=15,16,17,18,19,4,5,7,1",
-title="Highlight gene TCF7L2"
-));
-
-# Add test for using gencode gene table
-tests.append(Test(
-"--prefix gencode_test --metal tests/data/test_annot_col.txt --gene-table gencode --refgene TCF7L2 --build hg19 --pop EUR --source 1000G_March2012 --markercol SNPID --pvalcol PVAL annotCol=annotation annotPch=15,16,17,18,19 annotOrder=stop,non_syn,intron,syn",
-title = "Testing GENCODE genes instead of refFlat"
+"--prefix 1000g_nov2014_EUR_hg19_KCNQ1_gwascat --gwas-cat whole-cat_significant-only --markercol SNPID --pvalcol PVAL --metal tests/data/DIAGRAMv4_iSNPs_FUSION_1000G_MAR12_WLD_121012_PK_noindels_chrpos_tabdelim_test-region4.txt --refgene KCNQ1 --flank 250kb   --source 1000G_Nov2014 --no-cleanup --pop EUR --build hg19 showAnnot=F",
+title = "NHGRI GWAS / hg19 / KCNQ1"
 ));
