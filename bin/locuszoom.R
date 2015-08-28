@@ -1905,25 +1905,27 @@ zplot <- function(metal,ld=NULL,recrate=NULL,refidx=NULL,nrugs=0,postlude=NULL,a
   refSnp <- metal$MarkerName[refidx];
 
   metal$P.value <- as.numeric(metal$P.value);
-
-  if ( char2Rname(args[['weightCol']]) %in% names(metal) ){
-    metal$Weight <- metal[ ,char2Rname(args[['weightCol']]) ];
-    
-    dotSizes <- rescale(
-      metal$Weight,
-      oldScale = args[['weightRange']], 
-      newScale = c(args[['smallDot']],args[['largeDot']]), 
-      transformation=sqrt
-    ); 
-    
-  } else {
-    dotSizes <- rep(args[['largeDot']],dim(metal)[1]);
-    
-    if (! is.null(args[['refDot']]) ) {
-      dotSizes[refidx] <- args[['refDot']];
-    } 
-  }
   
+  dotSizes <- rep(args[['largeDot']],dim(metal)[1]);
+  
+  if (!is.null(args[['refDot']]) ) {
+    dotSizes[refidx] <- args[['refDot']];
+  } 
+
+  if (char2Rname(args[['weightCol']]) %in% names(metal)){
+    metal$Weight <- metal[,char2Rname(args[['weightCol']])];
+   
+    # Weights must vary in order to scale point sizes by them. 
+    if (diff(range(metal$Weight)) > 0) {
+      dotSizes <- rescale(
+        metal$Weight,
+        oldScale = args[['weightRange']], 
+        newScale = c(args[['smallDot']],args[['largeDot']]), 
+        transformation=sqrt
+      ); 
+    }
+  }
+
   metal$dotSizes = dotSizes; 
   
   if ( is.null(args[['refDot']]) ) {
