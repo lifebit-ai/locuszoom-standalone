@@ -690,3 +690,8 @@ tests.append(Test(
 title="Highlight gene TCF7L2 and CASP7"
 ));
 
+tests.append(Test(
+"--prefix test_all_weights_equal --metal tests/data/test_weights_in_region_all_equal.tab --chr 10 --start 91498515 --end 92502028 --source 1000G_Nov2014 --build hg19 --pop EUR --prefix weight_bug_all_same --pvalcol P --markercol Variant weightCol=Sample",
+title="Weights are all equal - still should be points"
+))
+
