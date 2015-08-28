@@ -549,6 +549,15 @@ def read_metal(metal_file,snp_column,pval_column,no_transform,chr,start,end,db_f
   print >> out, "\t".join(["chr","pos"] + metal_header);
   format_str = "\t".join(["%i","%i"] + ["%s" for i in xrange(len(metal_header))]);
   
+  # P-value check functions
+  pval_checks = [
+    lambda x: x.is_finite()
+  ]
+
+  if not no_transform:
+    # If we're transforming to -log10, p-values coming in should be > 0. 
+    pval_checks.append(lambda x: x > 0)
+  
   found_in_region = False;
   found_chrpos = False;
   min_snp = None;
@@ -586,8 +595,9 @@ def read_metal(metal_file,snp_column,pval_column,no_transform,chr,start,end,db_f
       if is_number(pval):     
         dec_pval = decimal.Decimal(pval);
         
-        if dec_pval == 0 or not dec_pval.is_finite():
-          print >> sys.stderr, "Warning: marker at position %s has invalid p-value: %s, skipping.." % (marker_name,str(pval));
+        pval_ok = all((f(dec_pval) for f in pval_checks))
+        if not pval_ok:
+          print >> sys.stderr, "Warning: marker %s has invalid p-value: %s, skipping.." % (snp,str(pval));
           continue;
       
         if dec_pval < min_pval:
@@ -709,6 +719,15 @@ def read_epacts(epacts_file,chr,start,end,chr_col,beg_col,end_col,pval_col,no_tr
   # Arbitrary arithmetic precision  
   decimal.getcontext().prec = 8;
 
+  # P-value check functions
+  pval_checks = [
+    lambda x: x.is_finite()
+  ]
+
+  if not no_transform:
+    # If we're transforming to -log10, p-values coming in should be > 0. 
+    pval_checks.append(lambda x: x > 0)
+
   found_in_region = False;
   min_snp = None;
   min_pval = decimal.Decimal(1);
@@ -746,9 +765,10 @@ def read_epacts(epacts_file,chr,start,end,chr_col,beg_col,end_col,pval_col,no_tr
   
       if is_number(pval):     
         dec_pval = decimal.Decimal(pval);
-      
-        if dec_pval == 0 or not dec_pval.is_finite():
-          print >> sys.stderr, "Warning: marker at position %s has invalid p-value: %s, skipping.." % (marker_name,str(pval));
+
+        pval_ok = all((f(dec_pval) for f in pval_checks))
+        if not pval_ok:
+          print >> sys.stderr, "Warning: marker %s has invalid p-value: %s, skipping.." % (marker_name,str(pval));
           continue;
 
         if dec_pval < min_pval:
