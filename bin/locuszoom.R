@@ -2129,8 +2129,9 @@ zplot <- function(metal,ld=NULL,recrate=NULL,refidx=NULL,nrugs=0,postlude=NULL,a
   pushViewport(titleVp);
   
   if (b_title) {
+    title_esc = gsub("\\\\n","\n",args[['title']])
     grid.text(
-      args[['title']],
+      title_esc,
       gp = gpar(
         cex=args[['titleCex']],
         col=args[['titleColor']],
