@@ -1855,12 +1855,19 @@ def runQueries(chr,start,stop,snpset,build,db_file,do_annot,gene_table):
 
   if gene_table in db_tables:
     results['refFlat'] = runQuery(refflat_in_region,[db,gene_table,chr,start,stop,build])
-  
-  if all([x in db_tables for x in (SQLITE_SNP_POS,SQLITE_VAR_ANNOT)]) and do_annot:
-    results['annot'] = runQuery(snp_annot_in_region,[db,SQLITE_SNP_POS,SQLITE_VAR_ANNOT,chr,start,stop,build])
+  else:
+    print >> sys.stderr, "Warning: gene table '%s' not found in database, skipping gene lookups in region" % gene_table
+ 
+  if do_annot:
+    if all([x in db_tables for x in (SQLITE_SNP_POS,SQLITE_VAR_ANNOT)]):
+      results['annot'] = runQuery(snp_annot_in_region,[db,SQLITE_SNP_POS,SQLITE_VAR_ANNOT,chr,start,stop,build])
+    else:
+      print >> sys.stderr, "Warning: either SNP position table '%s' or annotation table '%s' were not found in database" % (SQLITE_SNP_POS,SQLITE_VAR_ANNOT)
 
   if SQLITE_RECOMB_RATE in db_tables:
     results['recomb'] = runQuery(recomb_in_region,[db,SQLITE_RECOMB_RATE,chr,start,stop,build])
+  else:
+    print >> sys.stderr, "Warning: recombination rate table '%s' not found in database, skipping recomb rate lookups in region" % SQLITE_RECOMB_RATE
     
   if all([x in db_tables for x in (SQLITE_SNP_POS,SQLITE_SNP_SET)]):
     results['snpsetFile'] = runQuery(snpset_in_region,[db,SQLITE_SNP_POS,SQLITE_SNP_SET,snpset,chr,start,stop,build])
