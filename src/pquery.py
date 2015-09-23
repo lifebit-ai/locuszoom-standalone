@@ -21,44 +21,44 @@ import sqlite3
 import sys
 
 def chr2ucsc(c):
-  c = int(c);
+  c = int(c)
   if c < 23 and c > 0:
-    return 'chr' + str(c);
+    return 'chr' + str(c)
   elif c == 23:
-    return 'chrX';
+    return 'chrX'
   elif c == 24:
-    return 'chrY';
+    return 'chrY'
   elif c == 25:
-    return 'chrmito';
+    return 'chrmito'
   elif c == 26:
-    return 'chrXY';
+    return 'chrXY'
   else:
-    return None;
+    return None
 
 def sql_if(test,if_true,if_false):
   if test:
-    return if_true;
-  return if_false;
+    return if_true
+  return if_false
 
 def print_results(cur,delim="\t",out=sys.stdout):
   def na_none(x):
     if x == None:
-      return 'NA';
+      return 'NA'
     else:
-      return x;
+      return x
   
-  header = [i[0] for i in cur.description];
-  print >> out, delim.join(header);
-  count = 0;
+  header = [i[0] for i in cur.description]
+  print >> out, delim.join(header)
+  count = 0
   for row in cur:
-    row = map(na_none,row);
-    print >> out, delim.join([str(i) for i in row]);
-    count += 1;
+    row = map(na_none,row)
+    print >> out, delim.join([str(i) for i in row])
+    count += 1
     
-  return count;
+  return count
 
 #def snp_annot_in_region(db,snp_pos_table,var_annot_table,chr,start,stop,build):
-#  db.create_function("if",3,sql_if);
+#  db.create_function("if",3,sql_if)
 #  
 #  query = """
 #    SELECT
@@ -86,10 +86,10 @@ def print_results(cur,delim="\t",out=sys.stdout):
 #      and (pos >= ?)
 #      and (pos <= ?)
 #      and (build = ?)
-#  """ % (snp_pos_table,var_annot_table);
+#  """ % (snp_pos_table,var_annot_table)
 #
-#  result = db.execute(query,[chr,start,stop,build]);
-#  return result;
+#  result = db.execute(query,[chr,start,stop,build])
+#  return result
 
 #def snp_annot_in_region(db,snp_pos_table,var_annot_table,chr,start,stop,build): 
 #  query = """
@@ -103,10 +103,10 @@ def print_results(cur,delim="\t",out=sys.stdout):
 #      chr = ?
 #      and (pos >= ?)
 #      and (pos <= ?)
-#  """ % (snp_pos_table,var_annot_table);
+#  """ % (snp_pos_table,var_annot_table)
 #
-#  result = db.execute(query,[chr,start,stop]);
-#  return result;
+#  result = db.execute(query,[chr,start,stop])
+#  return result
 
 def snp_annot_in_region(db,snp_pos_table,var_annot_table,chr,start,stop,build):
   query = """
@@ -118,10 +118,10 @@ def snp_annot_in_region(db,snp_pos_table,var_annot_table,chr,start,stop,build):
       chr = ?
       and (pos >= ?)
       and (pos <= ?)
-  """ % (var_annot_table);
+  """ % (var_annot_table)
 
-  result = db.execute(query,[chr,start,stop]);
-  return result;
+  result = db.execute(query,[chr,start,stop])
+  return result
 
 def recomb_in_region(db,recomb_table,chr,start,stop,build):
   query = """
@@ -131,12 +131,12 @@ def recomb_in_region(db,recomb_table,chr,start,stop,build):
       chr = ?
       and pos BETWEEN ? and ?
     ORDER BY chr, pos
-  """ % recomb_table;
+  """ % recomb_table
 
-  return db.execute(query,(chr,start,stop));
+  return db.execute(query,(chr,start,stop))
 
 def snpset_in_region(db,snp_pos_table,snp_set_table,snp_set,chr,start,stop,build):
-  snp_set = ",".join(["'" + i.strip() + "'" for i in snp_set.split(",")]);
+  snp_set = ",".join(["'" + i.strip() + "'" for i in snp_set.split(",")])
   query = """
     SELECT ss.snp, p.chr, p.pos, ss.snp_set
     FROM %s ss, %s p
@@ -152,9 +152,9 @@ def snpset_in_region(db,snp_pos_table,snp_set_table,snp_set,chr,start,stop,build
     snp_set,
     start,
     stop
-  );
+  )
 
-  return db.execute(query);
+  return db.execute(query)
 
 def refflat_in_region(db,refflat,chr,start,stop,build):
   query = """
@@ -164,28 +164,28 @@ def refflat_in_region(db,refflat,chr,start,stop,build):
       chrom = ?
       and txEnd >= ?
       and txStart < ?
-  """ % refflat;
+  """ % refflat
 
-  return db.execute(query,(chr2ucsc(chr),start,stop));
+  return db.execute(query,(chr2ucsc(chr),start,stop))
 
 def test():
   # Connect.  
-  db = sqlite3.connect("fusion_100423.db");
+  db = sqlite3.connect("fusion_100423.db")
 
   # add if function
-  db.create_function("if",3,sql_if);
+  db.create_function("if",3,sql_if)
 
 #  cur = snp_annot_in_region(db,1,0,100000,"hg18")
-#  print_results(cur,"\t");
+#  print_results(cur,"\t")
 
-#  cur = recomb_in_region(db,"recomb_rate_hg18",1,0,100000);
-#  print_results(cur,"\t");
+#  cur = recomb_in_region(db,"recomb_rate_hg18",1,0,100000)
+#  print_results(cur,"\t")
 
-  cur = refflat_in_region(db,"refFlat_hg18",1,0,10000);
-  print_results(cur);
+  cur = refflat_in_region(db,"refFlat_hg18",1,0,10000)
+  print_results(cur)
 
 def main():
-  test();
+  test()
 
 if __name__ == "__main__":
-  main();
+  main()

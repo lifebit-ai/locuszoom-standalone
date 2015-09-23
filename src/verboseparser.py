@@ -25,32 +25,32 @@ import sys
 # Slightly modified OptionParser to make the help output look reasonable.
 class VerboseParser(OptionParser):
   def __init__(self,*args,**kwargs):
-    OptionParser.__init__(self,*args,**kwargs);
+    OptionParser.__init__(self,*args,**kwargs)
 
   def print_help(self):
     # Print usage.
-    print "usage: %s" % self.usage;
-    print "";
+    print "usage: %s" % self.usage
+    print ""
 
-    console_width = 120;
+    console_width = 120
     try:
-      console_width = get_terminal_size(120)[0];
+      console_width = get_terminal_size(120)[0]
     except:
       pass
     
     # Print options.
     for option in self.option_list:
       if option.help == "SUPPRESSHELP":
-        continue;
+        continue
 
       if option.type != None:
         print fill(", ".join(option._short_opts + option._long_opts) + " <%s>" % option.type,\
-          initial_indent="  ",subsequent_indent="  ",width=console_width);
+          initial_indent="  ",subsequent_indent="  ",width=console_width)
       else:
         print fill(", ".join(option._short_opts + option._long_opts),\
-          initial_indent="  ",subsequent_indent="  ",width=console_width);
+          initial_indent="  ",subsequent_indent="  ",width=console_width)
 
       for line in option.help.split("\n"):
-        print fill(line,initial_indent="    ",subsequent_indent="    ",width=console_width);
-      print "";
+        print fill(line,initial_indent="    ",subsequent_indent="    ",width=console_width)
+      print ""
 
