@@ -622,7 +622,7 @@ def read_metal(metal_file,snp_column,pval_column,no_transform,chr,start,end,db_f
   
   if found_chrpos:
     print >> sys.stderr, ""
-    print >> sys.stderr, fill("WARNING: your association results file has both rsID and "
+    print >> sys.stderr, fill("WARNING: your association results file has "
                           "chr:pos SNP names. Please make sure you have selected the "
                           "correct genome build by using the --build parameter, or by "
                           "selecting the appropriate build on the website.")
