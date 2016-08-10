@@ -866,8 +866,11 @@ def cleanup(files):
     print "cleanup() called for files: "
     for f in files:
       print ".. %s" % f
-      
-  files = filter(lambda x: x != None,files)
+  
+  def check_file(f):
+    return (f is not None) and (f != '') and (f != "NULL") and (f != '/')
+
+  files = filter(check_file,files)
   for f in files:
     try:
       os.remove(f)

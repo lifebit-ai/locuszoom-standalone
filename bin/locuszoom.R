@@ -48,6 +48,32 @@ my_browser = function() {
 # function definitions
 ################################################################################################
 
+stextGrob <- function (label, r=0.1, x = unit(0.5, "npc"), y = unit(0.5, "npc"), 
+                       just = "centre", hjust = NULL, vjust = NULL, rot = 0, check.overlap = FALSE, 
+                       default.units = "npc", name = NULL, gp = gpar(), vp = NULL){
+
+  let <- textGrob("a")
+  
+  tg <- textGrob(label=label, x=x, y=y, gp=gpar(col="black"),
+                 just = just, hjust = hjust, vjust = vjust, rot = rot,
+                 check.overlap = check.overlap, 
+                 default.units = default.units)
+  
+  tgl <- c(lapply(seq(0, 2*pi, length=18), function(theta){
+
+    textGrob(label=label,x=x+cos(theta)*r*grobWidth(let),
+             y=y+sin(theta)*r*grobHeight(let), gp=gpar(col="white"),
+             just = just, hjust = hjust, vjust = vjust, rot = rot,
+             check.overlap = check.overlap, 
+             default.units = default.units)
+    
+    }), list(tg))
+  
+
+  g <- gTree(children=do.call(gList, tgl), vp=vp, name=name, gp=gp)
+
+}
+
 parse_expression = function(x) {
   expr = x
   
@@ -462,6 +488,33 @@ LoadGWASHits = function(file,verbose=TRUE,...) {
   gwas;
 }
 
+LoadBarplotData = function(file,chrom_col="chr",pos_col="pos",value_col="value",verbose=TRUE,...) {
+  if (!file.exists(file)) {
+    # try directory above
+    file = file.path("..",file);
+    if (!file.exists(file)) {
+      warning("could not find barplot data file..");
+      return(NULL);
+    }
+  }
+
+  barplotdf = read.table(file,header=T,sep="\t",comment.char="",stringsAsFactors=F,quote="");
+
+  # Do we have the correct columns? 
+  if (!all(c(chrom_col,value_col,pos_col) %in% names(barplotdf))) {
+    warning("barplot data file given, but did not have correct columns (or header)")
+    return(NULL);
+  }
+
+  barplotdf[,"chr"] = gsub("chr","",barplotdf$chr)
+  barplotdf[,"pos_int"] = barplotdf[,pos_col]
+  barplotdf[,"pos"] = barplotdf[,pos_col] / 1E6;
+
+  barplotdf;
+}
+
+df_empty = function(dframe) { return(dim(dframe)[1] == 0) }
+
 #############################################################
 #
 # return an empty data from with some additonal attributes
@@ -500,7 +553,7 @@ AdjustModesOfArgs <- function(args) {
       'frameAlpha','hiAlpha','rugAlpha',
       'refsnpLineAlpha', 'recombFillAlpha','recombLineAlpha', 'refsnpTextAlpha', 'refsnpLineWidth',
       'ymin','ymax','legendSize','refsnpTextSize','axisSize','axisTextSize','geneFontSize','smallDot',
-      'largeDot','refDot','ldThresh','rightMarginLines'),
+      'largeDot','refDot','ldThresh','rightMarginLines','barplotMinY','barplotMaxY'),
     as.numeric);
 
   args <- sublapply(args,
@@ -508,7 +561,7 @@ AdjustModesOfArgs <- function(args) {
     as.filename);
 
   args <- sublapply(args,
-    c('chr','unit','xnsmall','fmrows','gwrows','condRefsnpPch'),
+    c('chr','unit','xnsmall','fmrows','gwrows','barplotRows','condRefsnpPch'),
     as.integer);
 
   args <- sublapply(args,
@@ -522,7 +575,7 @@ AdjustModesOfArgs <- function(args) {
     as.logical);
 
   args <- sublapply( args,
-    c('ldCuts','xat','yat','annotPch','condPch','signifLine','signifLineWidth'),
+    c('ldCuts','xat','yat','annotPch','condPch','signifLine','signifLineWidth','barplotAxisTicks'),
     function(x) { as.numeric(unlist(strsplit(x,","))) } );
   
   args <- sublapply( args,
@@ -773,7 +826,7 @@ grid.refsnp <- function(name,pos,pval,draw.name=TRUE,label=NULL,color=NULL,shado
       );
       
     } else {
-      if (FALSE & "gridExtra" %in% installed.packages()[,1] & shadow) { grob_func = stextGrob }
+      if (TRUE & "gridExtra" %in% installed.packages()[,1] & shadow) { grob_func = stextGrob }
       else { grob_func = textGrob }
 
       refsnp_text = grob_func(
@@ -1889,7 +1942,30 @@ panel.gwas <- function (
   # sink(NULL);
   # sink(NULL,type="message");
   # browser();
+}
+
+panel.barplot = function(dframe,xcol="pos",ycol="value") {
+  if (!is.null(args[['barplotMinY']])) {
+    min_val = args[['barplotMinY']]
+  } else {
+    min_val = min(dframe[,ycol])
+  }
   
+  if (!is.null(args[['barplotMaxY']])) {
+    max_val = args[['barplotMaxY']]
+  } else {
+    max_val = max(dframe[,ycol])
+  }
+
+  #fudge = 0.001 * (max_val - min_val)
+
+  grid.segments(
+    x0 = unit(dframe[,xcol],"native"),
+    y0 = unit(min_val,"native"),
+    x1 = unit(dframe[,xcol],"native"),
+    y1 = unit(dframe[,ycol],"native"),
+  )
+
 }
 
 #############################################################
@@ -1941,9 +2017,6 @@ zplot <- function(metal,ld=NULL,recrate=NULL,refidx=NULL,nrugs=0,postlude=NULL,a
   title_lines = ifelse(b_title | b_expr_title,3,0);
 
   grid.newpage();
-  
-  bed_lines = length(unique(bed_tracks$name));
-  bed_height = 1; # lines
 
   # Right column width is either fixed (5 lines) or extended based on the names
   # next to the BED tracks
@@ -1956,14 +2029,71 @@ zplot <- function(metal,ld=NULL,recrate=NULL,refidx=NULL,nrugs=0,postlude=NULL,a
   # } else {
     # right_col_width = 5;
   # }
+
+  draw_bed = !is.null(bed_tracks)
+  draw_gwas = !is.null(gwas_hits)
+  draw_barplot = !is.null(barplot_data)
+  draw_finemap = !is.null(fmregions)
+
+  # Number of lines to use for drawing bed tracks 
+  if (draw_bed) { 
+    bed_lines = length(unique(bed_tracks$name));
+  } else {
+    bed_lines = 0
+  }
+  bed_height = 1; # lines
+
+  # Number of lines to use for barplot
+  # If no data specified, we don't want it to use any lines
+  if (!draw_barplot) {
+    args[["barplotRows"]] = 0
+  }
+
+  sep_size = 0.5
   
   # push viewports just to calculate optimal number of rows for refFlat
   pushViewport(viewport(
-    layout = grid.layout(2+3+4+1+1+1+1+1+1,1+2, 
+    layout = grid.layout(2+3+4+1+1+1+1+1+1+1+1,1+2, 
       widths = unit(c(5,1,5),c('lines','null','lines')),
       heights = unit(
-        c(.5,title_lines,nrugs,1,1,0.25,bed_height*bed_lines,0.25,1.8*args[['gwrows']],0.25,2*args[['fmrows']],0.25,2*args[['rfrows']],4,.25),
-        c('lines','lines','lines','lines','null','lines','lines','lines','lines','lines','lines','lines','lines', 'lines','lines')
+        c(
+          .5,
+          title_lines,
+          nrugs,
+          1,
+          1,
+          sep_size,
+          2*args[['barplotRows']],
+          ifelse(draw_barplot,sep_size,0),
+          bed_height*bed_lines,
+          ifelse(draw_bed,sep_size,0),
+          1.8*args[['gwrows']],
+          ifelse(draw_gwas,sep_size,0),
+          2*args[['fmrows']],
+          ifelse(draw_finemap,sep_size,0),
+          2*args[['rfrows']],
+          4,
+          .25
+        ),
+        c(
+          'lines', # 0.5      1
+          'lines', # title    2
+          'lines', # nrugs    3
+          'lines', # 1        4
+          'null',  # 1        5
+          'lines', # 0.25     6
+          'lines', # barplot  7
+          'lines',
+          'lines',
+          'lines',
+          'lines',
+          'lines',
+          'lines',
+          'lines',
+          'lines',
+          'lines',
+          'lines'
+        )
       )
     )
   ));
@@ -1979,7 +2109,7 @@ zplot <- function(metal,ld=NULL,recrate=NULL,refidx=NULL,nrugs=0,postlude=NULL,a
 
   pushViewport(viewport(
     xscale=pvalVp$xscale,
-    layout.pos.row=13,
+    layout.pos.row=15,
     layout.pos.col=2,
     name="refFlatOuter"
   ));
@@ -2006,7 +2136,7 @@ zplot <- function(metal,ld=NULL,recrate=NULL,refidx=NULL,nrugs=0,postlude=NULL,a
 
   pushViewport(viewport(
     xscale=pvalVp$xscale,
-    layout.pos.row=11,
+    layout.pos.row=13,
     layout.pos.col=2,
     name="finemapOuter"
   ));
@@ -2033,7 +2163,7 @@ zplot <- function(metal,ld=NULL,recrate=NULL,refidx=NULL,nrugs=0,postlude=NULL,a
 
   pushViewport(viewport(
     xscale=pvalVp$xscale,
-    layout.pos.row=9,
+    layout.pos.row=11,
     layout.pos.col=2,
     name="gwasOuter"
   ));
@@ -2057,14 +2187,31 @@ zplot <- function(metal,ld=NULL,recrate=NULL,refidx=NULL,nrugs=0,postlude=NULL,a
     rows <- min( args[['gwrows']][2], optRowsGWAS )
     args[['gwrows']] <- max( args[['gwrows']][1], rows )
   }
+
+  pushViewport(viewport(
+    xscale=pvalVp$xscale,
+    layout.pos.row=7,
+    layout.pos.col=2,
+    name="barplot"
+  ));
+
+  #optRowsBarplot = ifelse(draw_barplot,99,0)
+
+  #if ( length( args[['barplotRows']] < 2 ) ) {       # use value as upper bound
+    #args[['barplotRows']] <- min(args[['barplotRows']], optRowsBarplot)
+  #} else {  # use smallest two values as lower and upper bounds
+    #args[['barplotRows']] <- sort(args[['barplotRows']])
+    #rows <- min( args[['barplotRows']][2], optRowsBarplot )
+    #args[['barplotRows']] <- max( args[['barplotRows']][1], rows )
+  #}
     
-  popViewport(4);
+  popViewport(5);
 
   # OK.  Now we know how many rows to use and we can set up the layout we will actually use.
 
   pushViewport(viewport(
     layout = grid.layout(
-      2+3+4+1+1+1+1+1+1,1+2, 
+      2+3+4+1+1+1+1+1+1+1+1,1+2, 
       widths = unit(
         c(args[['axisTextSize']]*args[['leftMarginLines']],1,args[['axisTextSize']]*args[['rightMarginLines']]),
         c('lines','null','lines')
@@ -2076,18 +2223,39 @@ zplot <- function(metal,ld=NULL,recrate=NULL,refidx=NULL,nrugs=0,postlude=NULL,a
           nrugs,
           1,
           1,
-          0.25,
+          sep_size,
+          2*args[['geneFontSize']]*args[['barplotRows']],
+          ifelse(draw_barplot,sep_size,0),
           bed_height*bed_lines,
-          0.25,
+          ifelse(draw_bed,sep_size,0),
           1.5*args[['geneFontSize']]*args[['gwrows']],
-          0.25,
+          ifelse(draw_gwas,sep_size,0),
           2*args[['geneFontSize']]*args[['fmrows']],
-          0.25,
+          ifelse(draw_finemap,sep_size,0),
           2*args[['geneFontSize']]*args[['rfrows']],
           4,
           .25
         ),
-        c('lines','lines','lines','lines','null','lines','lines','lines','lines','lines','lines','lines','lines','lines','lines'))
+        c(
+          'lines', # 0.5
+          'lines', # title
+          'lines', # nrugs
+          'lines', # 1
+          'null',  # 1 
+          'lines', # 0.25
+          'lines', # barplot
+          'lines', # sep
+          'lines', # bed plot
+          'lines', # sep
+          'lines', # gwas 
+          'lines',
+          'lines',
+          'lines',
+          'lines',
+          'lines',
+          'lines'
+        )
+        )
       )
     )
   );
@@ -2095,21 +2263,23 @@ zplot <- function(metal,ld=NULL,recrate=NULL,refidx=NULL,nrugs=0,postlude=NULL,a
   ##
   # layout (top to bottom)
   # ----------------------
-  #    1 spacer
-  #    2 title text
-  #    3 rugs
-  #    4 separation
-  #    5 pvals
-  #    6 separation
-  #    7 bedTracks
-  #    8 separation 
-  #    9 gwas hits
-  #    10 separation
-  #    11 fine mapping regions
+  #    1  spacer
+  #    2  title text
+  #    3  rugs
+  #    4  separation
+  #    5  pvals
+  #    6  separation
+  #    7  barplot
+  #    8  separation
+  #    9  bedTracks
+  #    10 separation 
+  #    11 gwas hits
   #    12 separation
-  #    13 genes
-  #    14 subtitle text 
-  #    15 spacer
+  #    13 fine mapping regions
+  #    14 separation
+  #    15 genes
+  #    16 subtitle text 
+  #    17 spacer
   #
   # layout (left to right)
   # ----------------------
@@ -2161,7 +2331,6 @@ zplot <- function(metal,ld=NULL,recrate=NULL,refidx=NULL,nrugs=0,postlude=NULL,a
   #                clip="off");
   pushViewport(pvalVp);
   grid.yaxis(at=args[['yat']],gp=gpar(cex=args[['axisSize']],col=args[['frameColor']],alpha=args[['frameAlpha']]));
-#   grid.xaxis(at=args[['xat']],gp=gpar(cex=args[['axisSize']],col=args[['frameColor']],alpha=args[['frameAlpha']]));
   if (!is.null(args[['ylab']]) && nchar(args[['ylab']]) > 0) {
     grid.text(x=unit(args[['ylabPos']],'lines'),label=args[['ylab']],rot=90, 
       gp=gpar(cex=args[['axisTextSize']], col=args[['axisTextColor']], alpha=args[['frameAlpha']]) 
@@ -2199,7 +2368,7 @@ zplot <- function(metal,ld=NULL,recrate=NULL,refidx=NULL,nrugs=0,postlude=NULL,a
 
   pushViewport(viewport(clip="on",xscale=pvalVp$xscale,yscale=pvalVp$yscale,name='pvalsClipped'));
 
-  grid.rect(gp=gpar(col=args[['frameColor']],fill=NA,alpha=args[['frameAlpha']]));
+  grid.rect(gp=gpar(lwd=args[['frameLwd']],col=args[['frameColor']],fill=NA,alpha=args[['frameAlpha']]));
   
   groupIds <-  sort(unique(metal$group))
   print(table(metal$group));
@@ -2211,6 +2380,50 @@ zplot <- function(metal,ld=NULL,recrate=NULL,refidx=NULL,nrugs=0,postlude=NULL,a
       pch=23,
       default.units='native'
     );
+  }
+
+  barplotThreshold = args[['barplotThreshold']]
+  if ((!is.null(barplot_data)) & (!is.null(barplotThreshold))) {
+    # Find x-axis points with values that exceed the threshold. 
+    barplot_hilites = subset(barplot_data,value > barplotThreshold)
+    if (dim(barplot_hilites)[1] > 0) {
+      # Figure out which SNPs (points) these positions match up with. 
+      metal_match = match(barplot_hilites$pos_int,metal$pos_int)
+
+      # Get the p-values (y axis values)
+      barplot_hilites$y = transformation(metal[metal_match,"P.value"])
+
+      # Make a dashed line up for each position still remaining. 
+      if (args[['barplotDrawMatchingLine']]) { 
+        grid.segments(
+          x0 = barplot_hilites$pos,
+          y0 = unit(0,'npc'),
+          x1 = barplot_hilites$pos,
+          y1 = barplot_hilites$y,
+          default.units = "native",
+          gp = gpar(
+            lty = args[['barplotMatchingLineStyle']],
+            col = args[['barplotMatchingLineColor']]
+          )
+        )
+      }
+
+      # Wherever the position does not line up perfectly, draw a line all the way to the top
+      if (args[['barplotDrawOffLine']]) {
+        barplot_missing = barplot_hilites[is.na(barplot_hilites$y),]
+        grid.segments(
+          x0 = barplot_missing$pos,
+          y0 = unit(0,'npc'),
+          x1 = barplot_missing$pos,
+          y1 = unit(1,'npc'),
+          default.units = "native",
+          gp = gpar(
+            lty = args[['barplotOffLineStyle']],
+            col = args[['barplotOffLineColor']]
+          )
+        )
+      }
+    }
   }
 
   if (is.null(args[['cond_ld']])) {
@@ -2375,7 +2588,7 @@ zplot <- function(metal,ld=NULL,recrate=NULL,refidx=NULL,nrugs=0,postlude=NULL,a
     upViewport(1); 
   }
   
-  grid.rect(gp=gpar(col=args[['frameColor']],fill=NA,alpha=args[['frameAlpha']]));
+  grid.rect(gp=gpar(lwd=args[['frameLwd']],col=args[['frameColor']],fill=NA,alpha=args[['frameAlpha']]));
 
   if (is.null(cond_ld)) {
     pushViewport(viewport(clip="on",name='legend'));
@@ -2504,7 +2717,7 @@ zplot <- function(metal,ld=NULL,recrate=NULL,refidx=NULL,nrugs=0,postlude=NULL,a
   if(args[['rfrows']] > 0) {
     pushViewport(
       viewport(xscale=pvalVp$xscale,
-        layout.pos.row=13,
+        layout.pos.row=15,
         layout.pos.col=2,
         name="refFlatOuter")
     );
@@ -2515,7 +2728,7 @@ zplot <- function(metal,ld=NULL,recrate=NULL,refidx=NULL,nrugs=0,postlude=NULL,a
         clip="on")
     );
     
-    grid.rect(gp=gpar(col=args[['frameColor']],alpha=args[['frameAlpha']]));
+    grid.rect(gp=gpar(lwd=args[['frameLwd']],col=args[['frameColor']],alpha=args[['frameAlpha']]));
     
     panel.flatbed(
       flat=refFlat,
@@ -2615,7 +2828,7 @@ zplot <- function(metal,ld=NULL,recrate=NULL,refidx=NULL,nrugs=0,postlude=NULL,a
   if(args[['fmrows']] > 0) {
     pushViewport(viewport(
       xscale=pvalVp$xscale,
-      layout.pos.row=11,
+      layout.pos.row=13,
       layout.pos.col=2,
       name="finemapOuter"
     ));
@@ -2647,7 +2860,7 @@ zplot <- function(metal,ld=NULL,recrate=NULL,refidx=NULL,nrugs=0,postlude=NULL,a
   if(args[['gwrows']] > 0) {
     pushViewport(viewport(
       xscale=pvalVp$xscale,
-      layout.pos.row=9,
+      layout.pos.row=11,
       layout.pos.col=2,
       name="gwasOuter"
     ));
@@ -2680,7 +2893,7 @@ zplot <- function(metal,ld=NULL,recrate=NULL,refidx=NULL,nrugs=0,postlude=NULL,a
   if (!is.null(bed_tracks)) {
     pushViewport(viewport(
       xscale = pvalVp$xscale,
-      layout.pos.row = 7,
+      layout.pos.row = 9,
       layout.pos.col = 2,
       name = "bedTracks"
     ));
@@ -2689,6 +2902,63 @@ zplot <- function(metal,ld=NULL,recrate=NULL,refidx=NULL,nrugs=0,postlude=NULL,a
     grid.rect(gp=gpar(col=args[['frameColor']],fill=NA,alpha=args[['frameAlpha']]));
     
     upViewport(1);
+  }
+
+  if (draw_barplot) {
+    bar_min_y = ifelse(is.null(args[['barplotMinY']]),min(barplot_data$value),args[['barplotMinY']])
+    bar_max_y = ifelse(is.null(args[['barplotMaxY']]),max(barplot_data$value),args[['barplotMaxY']])
+
+    pushViewport(viewport(
+      xscale = pvalVp$xscale,
+      yscale = c(bar_min_y,bar_max_y),
+      layout.pos.row = 7,
+      layout.pos.col = 2,
+      name = "barplot"
+    ));
+    
+    panel.barplot(barplot_data)
+    
+    #upViewport(1);
+
+    #pushViewport(viewport(
+      #yscale = c(0,1),
+      #layout.pos.row = 7,
+      #layout.pos.col = 1,
+      #name = "barplot_axis"
+    #))
+
+    if (!is.null(args[['barplotAxisTicks']])) {
+      bar_yat = args[['barplotAxisTicks']]
+    } else {
+      bar_yat = lattice::yscale.components.default(range(barplot_data$value))$left$ticks$at
+    }
+
+    grid.yaxis(
+      #at=args[['yat']],
+      at = bar_yat,
+      gp=gpar(
+        cex=args[['axisSize']],
+        col=args[['frameColor']],
+        alpha=args[['frameAlpha']]
+      )
+    );
+
+    if (!is.null(args[['barplotAxisLabel']]) && nchar(args[['barplotAxisLabel']]) > 0) {
+      grid.text(
+        x=unit(args[['barplotLabelPos']],'lines'),
+        label=args[['barplotAxisLabel']],
+        rot=90, 
+        gp=gpar(
+          cex=args[['axisTextSize']],
+          col=args[['axisTextColor']],
+          alpha=args[['frameAlpha']]
+        ) 
+      );
+    }
+
+    grid.rect(gp=gpar(lwd=args[['frameLwd']],col=args[['frameColor']],alpha=args[['frameAlpha']]));
+
+    upViewport(1)
   }
 
   if (is.character(postlude) && file.exists(postlude)) {
@@ -3088,6 +3358,20 @@ default.args <- list(
   refFlat = NULL,                       # use this file with refFlat info (instead of pquery)
   fineMap = NULL,                       # give a file with fine mapping posterior probabilities
   gwasHits = NULL,                      # give a file with GWAS catalog hits (chr, pos, trait)
+  barplotRows = 3,                      # max number of rows for barplot 
+  barplotData = NULL,                   # give a file with barplot data (position, value)
+  barplotAxisLabel = NULL,              # what should axis be called for barplot data?
+  barplotAxisTicks = NULL,              # where should the ticks be drawn for the barplot data?
+  barplotMinY = NULL,                   # minimum value to show for barplot (automatically calc if NULL)
+  barplotMaxY = NULL,                   # maximum value to show for barplot (automatically calc if NULL)
+  barplotLabelPos = -3,                 # distance of barplot axis label from left side of plot (in grid lines)
+  barplotThreshold = 0.95,              # show a barplot threshold 
+  barplotDrawMatchingLine = TRUE,       # draw dashed lines for where barplot peaks match a SNP position
+  barplotDrawOffLine = TRUE,             # draw dashed lines for where barplot peaks do not match a SNP position
+  barplotMatchingLineColor = "black",   # color of dashed SNP-matched barplot peak lines
+  barplotMatchingLineStyle = 2,
+  barplotOffLineColor = "black",         # color of dashed non-SNP-matched barplot peak lines
+  barplotOffLineStyle = 3,
   showIso=FALSE,                        # show each isoform of gene separately
   showRecomb = TRUE,                    # show recombination rate?
   recomb=NULL,                          # rcombination rate file
@@ -3100,6 +3384,7 @@ default.args <- list(
   recombLineAlpha=0.8,                  # recomb line/text alpha
   frameColor='gray30',                  # frame color for plots
   frameAlpha=1,                         # frame alpha for plots
+  frameLwd=1,                         # frame line width
   legendSize=.8,                        # scaling factor of legend
   legendAlpha=1,                        # transparency of legend background
   legendMissing=TRUE,                   # show 'missing' as category in legend?
@@ -3214,7 +3499,11 @@ transformation <- SetTransformation( min(metal$P.value,na.rm=TRUE), max(metal$P.
 args[['LDTitle']] <- SetLDTitle( args[['ldCol']],args[['LDTitle']] )
 
 if ( args[['posCol']] %in% names(metal) ) {
+  # This one later gets modified to be in Mb, which ends up as float
   metal$pos <- metal[ ,args[['posCol']] ];
+
+  # This one will stay as an integer (or at least, it better be)
+  metal$pos_int <- as.integer(metal[,args[['posCol']]])
 } else {
   stop(paste('No column named',args[['posCol']]));
 }
@@ -3735,6 +4024,16 @@ if ( is.null(args[['reload']]) ) {
     gwas_hits = LoadGWASHits(args[['gwasHits']]);
   }
 
+  barplot_data = NULL;
+  if (!is.null(args[['barplotData']])) {
+    barplot_data = LoadBarplotData(args[['barplotData']])
+  }
+  
+  # subset to chrom
+  if (!is.null(barplot_data)) {
+    barplot_data = subset(barplot_data,chr == args[['chr']]);
+  }
+
   # subset gwas hits to plotting region
   if (!is.null(gwas_hits)) {
     b_gwas = (gwas_hits$chr == args[['chr']]) & (gwas_hits$pos <= args[['endBP']] / 1E6) & (gwas_hits$pos >= args[['startBP']] / 1E6);
@@ -4004,7 +4303,7 @@ sink(args[['log']], append=TRUE);
   cat('\n\n\n');
 sink();
 
-save(metal,refFlat,ld,recrate,refSnpPos,args,file='end.Rdata')
+save(metal,refFlat,ld,recrate,refSnpPos,barplot_data,fmregions,gwas_hits,bed_tracks,args,file='end.Rdata')
 CleanUp(args,refSnpPos,recrate,rug,ld,refFlatRaw);
 
 date();
