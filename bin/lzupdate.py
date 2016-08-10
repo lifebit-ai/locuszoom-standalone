@@ -452,6 +452,7 @@ def get_settings():
   p = OptionParser()
   p.add_option("-b","--build",help="Genome build (UCSC convention), e.g. hg18, hg19, etc.",default="hg19")
   p.add_option("--gencode",help="Build a gene table using GENCODE. This specifies the relase number.")
+  p.add_option("--gencode-tag",help="Only load GENCODE records with this tag, e.g. 'basic'")
   p.add_option("--gwas-cat",help="Build a gwas catalog file.",action="store_true",default=False)
   p.add_option("--db",help="Database name. Defaults to locuszoom_%build%.db.")
   p.add_option("--no-cleanup",help="Leave temporary files alone after creating database instead of deleting them.",default=False,action="store_true")
@@ -531,7 +532,11 @@ def main():
   os.system("%s --db %s --trans %s" % (db_script,db_name,refsnp_trans_file))
 
   if opts.gencode is not None:
-    os.system("%s --db %s --gencode %s" % (db_script,db_name,gencode_file))
+    cmd = "%s --db %s --gencode %s" % (db_script,db_name,gencode_file)
+    if opts.gencode_tag is not None:
+      cmd += " --gencode-tag %s" % opts.gencode_Tag
+
+    os.system(cmd)
 
   # Do we have recombination rates for this build?
   recomb_file = find_systematic("data/build/%s/recomb_rate/recomb_rate.tab" % build)
