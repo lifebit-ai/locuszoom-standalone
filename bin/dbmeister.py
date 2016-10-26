@@ -224,11 +224,19 @@ def gencode_to_refflat(gencode_file,out_file,gencode_tag=None):
       e = line.rstrip().split("\t");
 
       info = e[8];
-      values = dict(re.findall("(\w+?) \"(.+?)\";",info));
-      map(tags.add,values);
+      matches = re.findall("(\w+?) \"(.+?)\";",info)
+      values = dict()
+
+      for key, value in matches: 
+        if key == "tag":
+          values.setdefault(key,[]).append(value)
+        else:
+          values[key] = value
+      
+      map(tags.add,values)
 
       if gencode_tag is not None:
-        if ("tag" in values) and (values["tag"] != gencode_tag):
+        if ("tag" in values) and (gencode_tag not in values["tag"]):
           continue
 
       for i in xrange(len(cols)):
