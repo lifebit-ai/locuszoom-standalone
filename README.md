@@ -3,11 +3,7 @@
 This version of LocusZoom is no longer being developed. Only bug fixes
 will be made. 
 
-A new web-based interactive version of LocusZoom is currently under
-active development. For more information, please see the
-[locuszoom.js github site](https://github.com/statgen/locuszoom/) for
-information on using it on your own sites, or see a preview of it in
-action at [locuszoom.org](http://locuszoom.org/locuszoomjs.php). 
+A new web-based interactive version of LocusZoom is currently under active development. Please see the [locuszoom.js github site](https://github.com/statgen/locuszoom/) for information on using it on your own sites, or see a preview of it in action at [locuszoom.org](http://locuszoom.org/locuszoomjs.php). 
 
 # Docs
 
