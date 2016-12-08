@@ -1704,9 +1704,10 @@ panel.bed <- function(bed_data,track_height,startbp,endbp) {
   bed_data$end = sapply(bed_data$end,function(x) min(x,endbp));
   
   # plot each sub-track separately
-  sub_tracks = sort(unique(bed_data$name));
+  sub_tracks = rev(unique(bed_data$name))
   i = 0;
   for (sub_name in sub_tracks) {
+    cat("Plotting track ",sub_name,"\n")
     bed_sub = subset(bed_data,name == sub_name);
   
     # Combine regions that overlap to avoid overplotting
@@ -4095,7 +4096,8 @@ if ( is.null(args[['reload']]) ) {
       }
       
       bed_tracks = subset(bed_tracks,(chr == sub_chrom));
-      bed_tracks = bed_tracks[order(bed_tracks$start),];
+      # Removed to preserve ordering of tracks in file
+      #bed_tracks = bed_tracks[order(bed_tracks$start),];
       bed_tracks = subset(bed_tracks,
         (start <= args[['endBP']] / 1E6) & 
         (end >= args[['startBP']] / 1E6)
