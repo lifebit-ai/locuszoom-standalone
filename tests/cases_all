@@ -223,15 +223,6 @@ dprime_ceu_test = Test("--prefix dprime_CEU_test --metal tests/data/DIAGRAMv2_EU
 dprime_ceu_test.title = "Testing CEU LD with dprime";
 tests.append(dprime_ceu_test);
 
-# Test 1000G LD. 
-g1k_ceu_test = Test("--prefix 1000G_CEU_hg18_test --metal tests/data/Lipids1kG_METAANALYSIS_HDL_FDC_GC1_hg18.tbl --refgene LIPC --source 1000G_Aug2009 --pop CEU");
-g1k_ceu_test.title = "Testing 1000G CEU hg18";
-tests.append(g1k_ceu_test);
-
-refsnp_g1k_ceu_test = Test("--prefix 1000G_refsnp_CEU_hg18_test --metal tests/data/Lipids1kG_METAANALYSIS_HDL_FDC_GC1_hg18.tbl --refsnp chr16:55558762 --flank 300kb --source 1000G_Aug2009 --pop CEU");
-refsnp_g1k_ceu_test.title = "Testing 1000G CEU hg18, refsnp is 1000G";
-tests.append(refsnp_g1k_ceu_test);
-
 g1k_june2010_ceu_test = Test("--prefix 1000G_June2010_CEU_hg18_test --metal tests/data/Lipids1kG_METAANALYSIS_HDL_FDC_GC1_hg18.tbl --refgene LIPC --source 1000G_June2010 --pop CEU");
 g1k_june2010_ceu_test.title = "Testing 1000G June2010 CEU hg18";
 tests.append(g1k_june2010_ceu_test);
