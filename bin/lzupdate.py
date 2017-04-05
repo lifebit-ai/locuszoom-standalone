@@ -23,9 +23,10 @@ from optparse import OptionParser
 from decimal import Decimal
 
 # Import needed machinery from core program
-sys.path.insert(0,os.path.join(os.path.dirname(sys.argv[0]),"../src/"))
-from m2zfast import *
-from m2zutils import which, find_relative, find_systematic
+if __name__ == "__main__":
+  sys.path.insert(0,os.path.join(os.path.dirname(sys.argv[0]),"../src/"))
+  from m2zfast import *
+  from m2zutils import which, find_relative, find_systematic
 
 # Constants.
 DBMEISTER = "bin/dbmeister.py"
@@ -34,7 +35,6 @@ SQLITE_TRANS = "refsnp_trans"
 SQLITE_REFFLAT = "refFlat"
 SQLITE_GENCODE = "gencode"
 RS_MERGE_ARCH_URL = "ftp://ftp.ncbi.nih.gov/snp/database/organism_data/human_9606/RsMergeArch.bcp.gz"
-GENCODE_URL = "ftp://ftp.sanger.ac.uk/pub/gencode/Gencode_human/"
 GENCODE_FTP = "ftp.sanger.ac.uk"
 GUNZIP_PATH = "gunzip"
 REFFLAT_HEADER = "geneName name chrom strand txStart txEnd cdsStart cdsEnd exonCount exonStarts exonEnds".split()
@@ -293,6 +293,10 @@ def download_gencode(gencode_release,build):
   Download the latest annotation GTF from GENCODE for a particular release.
   Also makes an attempt to check this directory for the correct genome build.
   """
+  
+  grc_build = UCSC_TO_GRC.get(build)
+  if grc_build is None:
+    sys.exit("Unsupported build: {}".format(build))
 
   basedir = "pub/gencode/Gencode_human/release_%s" % gencode_release
 
@@ -301,34 +305,38 @@ def download_gencode(gencode_release,build):
   ftp.login("anonymous","locuszoom")
   ftp.cwd(basedir)
 
-  files = []
-  try:
-    files = ftp.nlst()
-  except ftplib.error_perm, resp:
-    if str(resp) == "550 No files found":
-      pass
-    else:
-      print >> sys.stderr, "Error: could not list files in GENCODE FTP, skipping GENCODE..."
-      return None
+  def list_files():
+    try:
+      files = ftp.nlst()
+      return files
+    except Exception as e:
+      sys.exit("Couldn't list files from GENCODE FTP, error was: " + e.msg)
 
-  # Check for the correct genome build.
-  grc_build = UCSC_TO_GRC.get(build)
-  if grc_build is not None:
-    # Do we have the GRC build in the genome.fa file?
-    build_ok = any(map(lambda x: re.search(r'.*%s.*\.fa\.gz' % grc_build,x) is not None,files))
+  files = list_files()
 
-    # If we couldn't find a GRCh## FA file that matches the correct build, we shouldn't proceed.
-    if not build_ok:
-      print >> sys.stderr, "Error: GENCODE release %s appears to not match the genome build (%s/%s) that you requested." % (gencode_release,build,grc_build)
-      return None
-  else:
-    print >> sys.stderr, "Warning: could not convert build %s to a GRC build (e.g. GRCh37). This means skipping the" \
-                         " check that your UCSC genome build is valid for this GENCODE release. Be absolutely sure that" \
-                         " the version you're requesting matches the correct genome build." % build
+  if "{}_mapping".format(grc_build) in files:
+    # GENCODE put the 37 mapping in a separate directory called "GRCh37_mapping"
+    # They also change the release id from e.g. v26 to v26lift37
+    # Hopefully they follow this in the future
+    basedir += "/" + "{}_mapping".format(grc_build)
+    gencode_release = "26lift{}".format(grc_build.replace("GRCh",""))
+
+    ftp.cwd("{}_mapping".format(grc_build))
+    files = list_files()
+
+  # Do we have the GRC build in the genome.fa file?
+  build_ok = any(map(lambda x: re.search(r'.*%s.*\.fa\.gz' % grc_build,x) is not None,files))
+
+  # If we couldn't find a GRCh## FA file that matches the correct build, we shouldn't proceed.
+  if not build_ok:
+    sys.exit("Error: GENCODE release %s appears to not match the genome build (%s/%s) that you requested." % (gencode_release,build,grc_build))
 
   # Now that we've done the genome build check, download the annotation file.
-  url = GENCODE_URL + "release_{release}/gencode.v{release}.annotation.gtf.gz".format(release = gencode_release)
-  dlfile = "gencode.v{release}.annotation.gtf.gz".format(release = gencode_release)
+  url = GENCODE_FTP + "/" + basedir + "/gencode.v{release}.annotation.gtf.gz".format(release = gencode_release)
+  dlfile = "gencode.v{release}.{build}.annotation.gtf.gz".format(release = gencode_release,build = grc_build)
+
+  import ipdb; ipdb.set_trace()
+
   urllib.urlretrieve(url,dlfile,reporthook=dl_hook)
 
   return dlfile
