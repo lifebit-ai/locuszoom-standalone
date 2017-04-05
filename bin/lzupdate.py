@@ -334,9 +334,6 @@ def download_gencode(gencode_release,build):
   # Now that we've done the genome build check, download the annotation file.
   url = GENCODE_FTP + "/" + basedir + "/gencode.v{release}.annotation.gtf.gz".format(release = gencode_release)
   dlfile = "gencode.v{release}.{build}.annotation.gtf.gz".format(release = gencode_release,build = grc_build)
-
-  import ipdb; ipdb.set_trace()
-
   urllib.urlretrieve(url,dlfile,reporthook=dl_hook)
 
   return dlfile
