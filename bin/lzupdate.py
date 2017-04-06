@@ -332,7 +332,7 @@ def download_gencode(gencode_release,build):
     sys.exit("Error: GENCODE release %s appears to not match the genome build (%s/%s) that you requested." % (gencode_release,build,grc_build))
 
   # Now that we've done the genome build check, download the annotation file.
-  url = GENCODE_FTP + "/" + basedir + "/gencode.v{release}.annotation.gtf.gz".format(release = gencode_release)
+  url = "ftp://" + GENCODE_FTP + "/" + basedir + "/gencode.v{release}.annotation.gtf.gz".format(release = gencode_release)
   dlfile = "gencode.v{release}.{build}.annotation.gtf.gz".format(release = gencode_release,build = grc_build)
   urllib.urlretrieve(url,dlfile,reporthook=dl_hook)
 
