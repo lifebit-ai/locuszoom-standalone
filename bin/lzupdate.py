@@ -39,7 +39,7 @@ GENCODE_FTP = "ftp.sanger.ac.uk"
 GUNZIP_PATH = "gunzip"
 REFFLAT_HEADER = "geneName name chrom strand txStart txEnd cdsStart cdsEnd exonCount exonStarts exonEnds".split()
 GWAS_PVAL = "5e-08"
-GWAS_CAT_URL = "http://www.genome.gov/admin/gwascatalog.txt"
+GWAS_CAT_URL = "ftp://ftp.ebi.ac.uk/pub/databases/gwas/releases/latest/gwas-catalog-associations.tsv"
 
 UCSC_TO_GRC = {
   'hg19' : 'GRCh37',
