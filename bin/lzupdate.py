@@ -179,6 +179,7 @@ class UCSCManager:
     latest_table = UCSCManager.getLatestSNPTable(build)
 
     url = "/".join([UCSCManager.UCSC_MAIN_URL,build,'database',latest_table + '.txt.gz'])
+    print url, "\n"
 
     file = path.join(dir,latest_table + ".gz")
     #progress = urlgrabber.progress.TextMeter()
@@ -193,6 +194,7 @@ class UCSCManager:
   def downloadLatestRefFlat(dir,build):
     url = "/".join([UCSCManager.UCSC_MAIN_URL,build,'database','refFlat.txt.gz'])
     file = path.join(dir,'refFlat_' + build + '.txt.gz')
+    print url, "\n"
 
     #progress = urlgrabber.progress.TextMeter()
     #grabber = urlgrabber.grabber.URLGrabber(progress_obj=progress,timeout=30)
@@ -205,6 +207,7 @@ class UCSCManager:
   def download_snp_table(dir,build,table):
     url = "/".join([UCSCManager.UCSC_MAIN_URL,build,'database',table + '.txt.gz'])
     file = path.join(dir,table + ".gz")
+    print url, "\n"
 
     if not exists(url):
       print >> sys.stderr, "Could not find SNP table %s at UCSC - check your table name." % table
@@ -333,6 +336,7 @@ def download_gencode(gencode_release,build):
 
   # Now that we've done the genome build check, download the annotation file.
   url = "ftp://" + GENCODE_FTP + "/" + basedir + "/gencode.v{release}.annotation.gtf.gz".format(release = gencode_release)
+  print url, "\n"
   dlfile = "gencode.v{release}.{build}.annotation.gtf.gz".format(release = gencode_release,build = grc_build)
   urllib.urlretrieve(url,dlfile,reporthook=dl_hook)
 
