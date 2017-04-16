@@ -543,7 +543,7 @@ def main():
   if opts.gencode is not None:
     cmd = "%s --db %s --gencode %s" % (db_script,db_name,gencode_file)
     if opts.gencode_tag is not None:
-      cmd += " --gencode-tag %s" % opts.gencode_Tag
+      cmd += " --gencode-tag %s" % opts.gencode_tag
 
     os.system(cmd)
 
