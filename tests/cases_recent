@@ -1,17 +1,13 @@
 
-# GWAS catalog tests
+# hg38 tests
+# This dataset is entirely rsID, should be translated to hg38 coordinates automatically
 tests.append(Test(
-"--prefix 1000g_nov2014_EUR_hg19_KCNQ1_gwascat --gwas-cat whole-cat_significant-only --markercol SNPID --pvalcol PVAL --metal tests/data/DIAGRAMv4_iSNPs_FUSION_1000G_MAR12_WLD_121012_PK_noindels_chrpos_tabdelim_test-region4.txt --refgene KCNQ1 --flank 250kb   --source 1000G_Nov2014 --no-cleanup --pop EUR --build hg19 showAnnot=F",
-title = "NHGRI GWAS / hg19 / KCNQ1"
+"--prefix hg38_magic_fglu_rsidtest --gwas-cat whole-cat_significant-only --metal tests/data/MAGIC_FastingGlucose_2011.txt --pvalcol P.value --refsnp rs780093 --flank 250kb --source 1000G_Nov2014 --no-cleanup --pop EUR --build hg38 showAnnot=F",
+title = "hg38 MAGIC 2011 FGlu"
 ));
 
 tests.append(Test(
-"--prefix test_all_weights_equal --metal tests/data/test_weights_in_region_all_equal.tab --chr 10 --start 91498515 --end 92502028 --source 1000G_Nov2014 --build hg19 --pop EUR --prefix weight_bug_all_same --pvalcol P --markercol Variant weightCol=Sample",
-title="Weights are all equal - still should be points"
-))
-
-#tests.append(Test(
-#"--prefix testbarplot --metal tests/data/DIAGRAMv4_iSNPs_FUSION_1000G_MAR12_WLD_121012_PK_noindels_chrpos_tabdelim_test-region1.txt --no-ld --markercol SNPID --pvalcol PVAL --refgene TCF7L2 --build hg19 barplotData=",
-#title="Barplot test"
-#))
+"--prefix hg19_magic_fglu_rsidtest --gwas-cat whole-cat_significant-only --metal tests/data/MAGIC_FastingGlucose_2011.txt --pvalcol P.value --refsnp rs780093 --flank 250kb --source 1000G_Nov2014 --no-cleanup --pop EUR --build hg19 showAnnot=F",
+title = "Same as previous plot but hg19 coordinates"
+));
 
