@@ -1265,7 +1265,7 @@ def getSettings():
     no_clean = False,
     no_ld = False,
     no_transform = False,
-    build = conf.DEFAULT_BUILD,
+    build = None,
     ld_measure = 'rsquare',
     gwas_cat = None,
     plotonly = False,
@@ -1273,15 +1273,19 @@ def getSettings():
     pvalcol = "P-value",
     snpcol = "MarkerName", 
     verbose = False,
-    pop = conf.DEFAULT_POP,
+    pop = None,
     snpset = "Illu1M",
     rundir = ".",
-    source = conf.DEFAULT_SOURCE,
+    source = None,
     experimental = False,
     cache = "../ld_cache.db",
   )
 
   (opts,args) = parser.parse_args()
+
+  # Absolutely must specify genome build
+  if opts.build is None:
+    die("Error: there is no longer a default for --build, you must specify it.")
 
   # Should we override M2Z path?
   if opts.m2zpath != None:
@@ -1446,6 +1450,13 @@ def getSettings():
 
   else:
     if not opts.no_ld:
+      # Check that pop and source were provided
+      if opts.pop is None:
+        die("Error: you must specify --pop, there is no longer a default")
+
+      if opts.source is None:
+        die("Error: you must specify --source, there is no longer a default")
+
       # Fix up population/build/source settings before checking.
       opts.pop = opts.pop.upper(); # populations are always upper-case
 
