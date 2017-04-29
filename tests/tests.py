@@ -41,8 +41,11 @@ def combine_plots(pdf_list,out_file):
     if not os.path.isfile(pdf):
       continue
   
-    pdfobj = PdfFileReader(file(pdf,"rb"))
-    output.addPage(pdfobj.getPage(0))
+    try:
+      pdfobj = PdfFileReader(file(pdf,"rb"))
+      output.addPage(pdfobj.getPage(0))
+    except:
+      print >> sys.stderr, "\nError combining PDF %s\n" % pdf
 
   out_stream = file(out_file,"wb")
   output.write(out_stream)
