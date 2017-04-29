@@ -13,6 +13,6 @@ A new web-based interactive version of LocusZoom is currently under active devel
 # Contact
 
 Contact/support options:
- * Submit an issue to the repository: https://github.com/statgen/locuszoom-standalone
+ * Submit an issue to the repository: https://github.com/statgen/locuszoom-standalone/issues
  * Post a message to the Google Group: https://groups.google.com/forum/#!forum/locuszoom
 
