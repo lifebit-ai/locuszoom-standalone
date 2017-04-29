@@ -90,6 +90,7 @@ def get_settings():
   p.add_option("--refflat",help="Flat file for RefSeq Genes (refFlat) gene information.");
   p.add_option("--knowngene",help="Flat file for UCSC Genes (knownGene) gene information.");
   p.add_option("--gencode",help="Flat file for GENCODE gene information.");
+  p.add_option("--gencode-tag",help="Restrict to this GENCODE tag only.")
   p.add_option("--snp_set",help="Flat file for sets of SNPs.")
   p.add_option("--var_annot",help="Flat file for SNP annotation.");
   p.add_option("--recomb_rate",help="Flat file containing recombination rates.");
@@ -190,7 +191,7 @@ def check_file(file,cols,delim="\t"):
   
   return True;
 
-def gencode_to_refflat(gencode_file,out_file):
+def gencode_to_refflat(gencode_file,out_file,gencode_tag=None):
   """
   Converts a GENCODE GTF into refFlat format for insertion into the database.
   We store both refFlat and GENCODE in refFlat format.
@@ -223,8 +224,20 @@ def gencode_to_refflat(gencode_file,out_file):
       e = line.rstrip().split("\t");
 
       info = e[8];
-      values = dict(re.findall("(\w+?) \"(.+?)\";",info));
-      map(tags.add,values);
+      matches = re.findall("(\w+?) \"(.+?)\";",info)
+      values = dict()
+
+      for key, value in matches: 
+        if key == "tag":
+          values.setdefault(key,[]).append(value)
+        else:
+          values[key] = value
+      
+      map(tags.add,values)
+
+      if gencode_tag is not None:
+        if ("tag" in values) and (gencode_tag not in values["tag"]):
+          continue
 
       for i in xrange(len(cols)):
         values[cols[i]] = e[i];
@@ -558,32 +571,37 @@ class SQLiteLoader():
     else:
       get_log().info("Skipping file %s due to errors.." % file);
 
-  def load_gencode(self,file):
+  def load_gencode(self,file,tag=None):
     columns = "geneName,name,chrom,strand,txStart,txEnd,cdsStart,cdsEnd,"\
               "exonCount,exonStarts,exonEnds".split(",");
     types = "TEXT,TEXT,TEXT,TEXT,INTEGER,INTEGER,INTEGER,INTEGER,INTEGER,"\
             "BLOB,BLOB,INTEGER".split(",");
     file_ok = check_file(file,columns);
+
+    table = SQLITE_GENCODE
+    if tag is not None:
+      table += "_" + tag
+
     if file_ok:
       get_log().info("Loading refFlat table from file %s.." % file);
 
       # Drop the original table if one existed.
-      self.dbi.drop_table(SQLITE_GENCODE);
+      self.dbi.drop_table(table);
 
       # Create table.
-      self.dbi.create_table(SQLITE_GENCODE,
+      self.dbi.create_table(table,
                         columns,
                         types);
 
       # Load table into database.
-      self.dbi.load_table(SQLITE_GENCODE,file);
+      self.dbi.load_table(table,file);
 
       # Get rid of header row.
-      self.dbi.remove_header(SQLITE_GENCODE,'geneName','geneName');
+      self.dbi.remove_header(table,'geneName','geneName');
 
       # Create indices.
-      self.dbi.create_index(SQLITE_GENCODE,['chrom','txStart','txEnd']);
-      self.dbi.create_index(SQLITE_GENCODE,['geneName']);
+      self.dbi.create_index(table,['chrom','txStart','txEnd']);
+      self.dbi.create_index(table,['geneName']);
     else:
       get_log().info("Skipping file %s due to errors.." % file);
 
@@ -712,10 +730,10 @@ def main():
   if opts.gencode:
     # We need to convert the GENCODE annotation GTF into refFlat format.
     gencode_refflat_file = opts.gencode.replace(".gtf.gz",".refFlat.tab");
-    gencode_to_refflat(opts.gencode,gencode_refflat_file);
+    gencode_to_refflat(opts.gencode,gencode_refflat_file,opts.gencode_tag);
 
     # Now we can load the refFlat formatted version of GENCODE
-    loader.load_gencode(gencode_refflat_file);
+    loader.load_gencode(gencode_refflat_file,opts.gencode_tag);
 
     if not opts.no_cleanup:
       try:
