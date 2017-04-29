@@ -1397,6 +1397,14 @@ def getSettings():
   if opts.refsnp:
     if not isSNP(opts.refsnp):
       die_help("Error: SNP %s not recognized as SNP" % str(opts.refsnp),parser)
+
+    # Check if refsnp appears to have specified alleles, warn user
+    rmatches = re.search("(chr)?([0-9a-zA-z]+):([0-9]+)(_.*)?",opts.refsnp).groups()
+    if rmatches[3] is not None:
+      print >> sys.stderr, ("Warning: it appears that you specified alleles (%s) with your --refsnp, but LocusZoom "
+                           "does not consider alleles, only the chrom and pos. If your results have multiple "
+                           "variants at the same position, LocusZoom will not distinguish between them." % rmatches[3].replace("_",""))
+
   elif opts.hitspec:
     opts.hitspec = find_systematic(opts.hitspec)
     if opts.hitspec is None:
