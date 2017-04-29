@@ -6,8 +6,7 @@ Documentation for this program is available on our wiki: http://genome.sph.umich
 
 # Status
 
-This version of LocusZoom is no longer under active development. Bug
-fixes and small updates may be made, though it is unlikely. 
+This version of LocusZoom is no longer under active development. Bug fixes and small updates may be made, though it is unlikely. 
 
 A new web-based interactive version of LocusZoom is currently under active development. Please see the [locuszoom.js github site](https://github.com/statgen/locuszoom/) for information on using it on your own sites, or see a preview of it in action at [locuszoom.org](http://locuszoom.org/locuszoomjs.php). 
 
