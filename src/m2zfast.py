@@ -80,7 +80,7 @@ M2ZFAST_TITLE = "+---------------------------------------------+\n"\
 M2ZFAST_CONF = "conf/m2zfast.conf"
 DEFAULT_SNP_FLANK = "200kb"
 DEFAULT_GENE_FLANK = "20kb"
-RE_SNP_1000G = re.compile("chr(\d+|[a-zA-z]+):(\d+)$")
+RE_SNP_1000G = re.compile("(chr)?([0-9a-zA-z]+):([0-9]+).*")
 RE_SNP_RS = re.compile("rs(\d+)")
 M2ZCL_FIRST = False
 MULTI_CAP = 8; 
@@ -283,13 +283,19 @@ def parse1000G(snp):
 
   c = snp.split(":")
   if len(c) == 2:
-    chr = chrom2chr(c[0])
+    chrom = c[0]
+    pos = c[1]
+
+    if "_" in pos:
+      pos = pos.split("_")[0]
+
+    chrom = chrom2chr(chrom)
     try:
-      pos = long(c[1])
+      pos = long(pos)
     except:
       return None
     
-    return (chr,long(c[1]))
+    return (chrom,pos)
   else:
     return None
 
@@ -1721,7 +1727,7 @@ def computeLD(snp,chr,start,end,build,pop,source,cache_file,fugue_cleanup,verbos
   try:
     ld_success = ld_finder.compute(snp.chrpos,chr,start,end)
     if ld_success:
-      ld_filename = "templd_" + snp.snp.replace(":","_") + "_" + time.strftime("%y%m%d",time.localtime()) + "-" + time.strftime("%H%M%S",time.localtime()) + ".txt"
+      ld_filename = "templd_" + snp.snp.replace(":","_").replace("/","") + "_" + time.strftime("%y%m%d",time.localtime()) + "-" + time.strftime("%H%M%S",time.localtime()) + ".txt"
     
       if os.path.isfile(ld_filename):
         print >> sys.stderr, "Warning: LD file already exists for some reason: %s" % ld_filename
@@ -2138,7 +2144,7 @@ def main():
         temp_dir += opts.prefix + "_"
       if not opts.no_date:
         temp_dir += time.strftime("%y%m%d") + "_"
-      temp_dir += str(entry[0])
+      temp_dir += windows_file_replace_chars(str(entry[0]))
 
       # Fix directories to not have characters that are invalid on Windows.
       temp_dir = windows_path_replace_chars(temp_dir)

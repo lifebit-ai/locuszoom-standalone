@@ -393,7 +393,7 @@ def main():
     args=[],
     run_dir="tests/results",
     log_file="log_file.txt",
-    multi=10
+    multi=16
    )
 
   print "Adding test cases to testing suites.."

@@ -698,3 +698,14 @@ tests.append(Test(
 title = "Same as previous plot but hg19 coordinates"
 ));
 
+# Refsnp without chr
+tests.append(Test(
+"--prefix refsnp_no_chr --gwas-cat whole-cat_significant-only --metal tests/data/MAGIC_FastingGlucose_2011.txt --pvalcol P.value --refsnp 2:27742603 --flank 250kb --source 1000G_Nov2014 --no-cleanup --pop EUR --build hg19 showAnnot=F",
+title = "Try plotting with refsnp without 'chr'"
+));
+
+# Refsnp is epacts format
+tests.append(Test(
+"--prefix refsnp_is_epacts --gwas-cat whole-cat_significant-only --metal tests/data/MAGIC_FastingGlucose_2011.txt --pvalcol P.value --refsnp 2:27742603_A/G --flank 250kb --source 1000G_Nov2014 --no-cleanup --pop EUR --build hg19 showAnnot=F",
+title = "Try plotting with refsnp in EPACTS format"
+));
