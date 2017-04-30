@@ -69,8 +69,8 @@ except:
   raise
 
 # Program strings.
-M2ZFAST_VERSION = "1.3"
-M2ZFAST_DATE = "06/20/2014"
+M2ZFAST_VERSION = "1.4"
+M2ZFAST_DATE = "05/01/2017"
 
 def repeat_char(s,n):
   from itertools import repeat
