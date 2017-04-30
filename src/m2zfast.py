@@ -70,11 +70,27 @@ except:
 
 # Program strings.
 M2ZFAST_VERSION = "1.3"
-M2ZFAST_TITLE = "+---------------------------------------------+\n"\
-                "| LocusZoom 1.3 (06/20/2014)                  |\n"\
-                "| Plot regional association results           |\n"\
-                "| from GWA scans or candidate gene studies    |\n"\
-                "+---------------------------------------------+\n"
+M2ZFAST_DATE = "06/20/2014"
+
+def repeat_char(s,n):
+  from itertools import repeat
+  return "".join(repeat(s,n))
+
+def table_pad(lines):
+  maxw = 0
+  for l in lines:
+    maxw = max(len(l),maxw)
+  pad = 2
+  print("+" + repeat_char("-",maxw+3) + "+")
+  for l in lines:
+    print("| {} {} |".format(l,repeat_char(" ",maxw - len(l))))
+  print("+" + repeat_char("-",maxw+3) + "+")
+
+M2ZFAST_TITLE = [
+  "LocusZoom {} ({})".format(M2ZFAST_VERSION,M2ZFAST_DATE),
+  "Plot regional association results",
+  "from GWA scans or candidate gene studies"
+]
 
 # Program constants. 
 M2ZFAST_CONF = "conf/m2zfast.conf"
@@ -1130,9 +1146,6 @@ def printArgs(args):
   
   table.printt()
 
-def printHeader(title):
-  print title
-
 class SNP:
   def __init__(self,snp=None,tsnp=None,chrpos=None,chr=None,pos=None):
     self.snp = snp;         # snp name given by user
@@ -2083,7 +2096,9 @@ def runAll(input_file,input_type,refsnp,chr,start,end,opts,args):
     cleanup([ld_temp,metal_temp] + pquery_files)
 
 def main():
-  printHeader(M2ZFAST_TITLE)
+  table_pad(M2ZFAST_TITLE)
+  print ""
+
   conf = getConf()
 
   # Get command-line arguments and parse them for errors.
