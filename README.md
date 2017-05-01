@@ -10,6 +10,24 @@ This version of LocusZoom is no longer under active development. Bug fixes and s
 
 A new web-based interactive version of LocusZoom is currently under active development. Please see the [locuszoom.js github site](https://github.com/statgen/locuszoom/) for information on using it on your own sites, or see a preview of it in action at [locuszoom.org](http://locuszoom.org/locuszoomjs.php). 
 
+# Releases
+
+| Build                                                                                               | Version | Date       | Size |
+|-----------------------------------------------------------------------------------------------------|---------|------------|------|
+| [Program + database + LD files](https://statgen.sph.umich.edu/locuszoom/download/locuszoom_1.4.tgz) | 1.4     | 2017-05-01 | 23G  |
+| [Program + database](https://statgen.sph.umich.edu/locuszoom/download/locuszoom_1.4_nold.tgz)       | 1.4     | 2017-05-01 | 16G  |
+| [Program only](https://statgen.sph.umich.edu/locuszoom/download/locuszoom_1.4_srconly.tgz)          | 1.4     | 2017-05-01 | 86K  |
+|                                                                                                     |         |            |      |
+| [Program + database + LD files](https://statgen.sph.umich.edu/locuszoom/download/locuszoom_1.3.tgz) | 1.3     | 2014-06-20 | 10G  |
+| [Program + database](https://statgen.sph.umich.edu/locuszoom/download/locuszoom_1.3_nold.tgz)       | 1.3     | 2014-06-20 | 4.3G |
+| [Program only](https://statgen.sph.umich.edu/locuszoom/download/locuszoom_1.3_srconly.tgz)          | 1.3     | 2014-06-20 | 79K  |
+
+Database contains required data for LocusZoom to function, though you can skip it if you are already creating your own. 
+
+LD files are entirely optional - you can calculate LD instead from your own genotype files (`--ld-vcf`), or not at all (`--no-ld`). 
+
+A full list of changes for each version can be found in the [changelog](docs/CHANGELOG.md). 
+
 # Contact
 
 Contact/support options:
