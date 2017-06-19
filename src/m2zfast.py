@@ -125,8 +125,11 @@ class Conf(object):
     for k,v in conf_dict.iteritems():
       exec "self.%s = v" % str(k)
 
-def getConf(conf_file=M2ZFAST_CONF):
-  conf_file = find_relative(conf_file)
+def getConf(conf_file=None):
+  if conf_file is None:
+    conf_file = M2ZFAST_CONF
+
+  conf_file = find_systematic(conf_file)
   conf = Conf(conf_file)
   return conf
 
@@ -1202,8 +1205,20 @@ def parse_denote_marker_file(filepath,sqlite_file):
 # args - all command line arguments that were positional, these are not checked
 # and are immediately passed on to locuszoom.R 
 def getSettings():
+  global M2ZFAST_CONF
+
+  # We have to figure out where conf is located first because the help is generated based on it. 
+  for i, f in enumerate(sys.argv):
+    if f == '--conf':
+      conf_path = sys.argv[i+1]
+      if os.path.isfile(conf_path):
+        print "Setting configuration path to user-specified file: " + conf_path
+        M2ZFAST_CONF = conf_path
+      else:
+        die("Error: --conf file not found " + conf_path)
+
   conf = getConf()
-  
+
   usage = "usage: locuszoom [options]"
   
   parser = VerboseParser(usage=usage)
@@ -1272,6 +1287,7 @@ def getSettings():
   parser.add_option("--override-m2z",dest="m2zpath",help=SUPPRESS_HELP)
   parser.add_option("--db",type="string",help="SQLite database file. This overrides the conf file.")
   parser.add_option("--offline",dest="offline",action="store_true",default=False,help=SUPPRESS_HELP)
+  parser.add_option("--conf",dest="conf",help="Override configuration file location.")
 
   # Defaults.
   parser.set_defaults(
@@ -1301,6 +1317,8 @@ def getSettings():
   )
 
   (opts,args) = parser.parse_args()
+
+  conf = getConf()
 
   # Absolutely must specify genome build
   if opts.build is None:
@@ -1336,7 +1354,7 @@ def getSettings():
     else:
       die("Error: --db %s does not exist!" % str(opts.db))
   else:
-    opts.sqlite_db_file = find_relative(conf.SQLITE_DB[opts.build]); # read from conf file
+    opts.sqlite_db_file = find_systematic(conf.SQLITE_DB[opts.build]); # read from conf file
     if not os.path.isfile(opts.sqlite_db_file):
       die("Error: could not locate sqlite database, tried: %s, check your conf file" % str(opts.sqlite_db_file))
 
@@ -2099,12 +2117,13 @@ def main():
   table_pad(M2ZFAST_TITLE)
   print ""
 
-  conf = getConf()
-
   # Get command-line arguments and parse them for errors.
   opts,args = getSettings()
   print "Loading settings.."
   
+  print "Using configuration file: " + M2ZFAST_CONF
+  conf = getConf()
+
   # Print important options. 
   print "Options in effect are:\n"
   printOpts(opts)

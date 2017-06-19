@@ -94,7 +94,7 @@ def locate(pattern, root=os.curdir, followlinks=True):
 # 2) relative to m2zfast's root directory
 # 3) on the user's path
 def find_systematic(file):
-  if file == None:
+  if file is None:
     return None
 
   if os.path.isfile(file):
