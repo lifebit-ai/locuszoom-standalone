@@ -709,3 +709,9 @@ tests.append(Test(
 "--prefix refsnp_is_epacts --gwas-cat whole-cat_significant-only --metal tests/data/MAGIC_FastingGlucose_2011.txt --pvalcol P.value --refsnp 2:27742603_A/G --flank 250kb --source 1000G_Nov2014 --no-cleanup --pop EUR --build hg19 showAnnot=F",
 title = "Try plotting with refsnp in EPACTS format"
 ));
+
+# Conf with --conf on cmdline
+tests.append(Test(
+"--prefix epacts_annot_test --epacts tests/data/test_epacts_with_annot_col.epacts.gz --refgene TCF7L2 --build hg19 --pop EUR --source 1000G_March2012 --conf conf/m2zfast.conf",
+title = "Use a config file specified on cmdline"
+));
