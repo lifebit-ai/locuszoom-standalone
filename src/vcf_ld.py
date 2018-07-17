@@ -97,7 +97,7 @@ def ld_rsquare_indexsnp_vcf(index_pos,vcf_file,region,tabix_path="tabix",ignore_
   try:
     index_gts = map(geno_to_code,index_rec[9:])
   except Exception as e:
-    # If we're here, either: 
+    # If we're here, either:
     # 1) the index SNP was not biallelic, or
     # 2) the index SNP had genotypes that were not phased
     print >> sys.stderr, e.message
@@ -113,15 +113,15 @@ def ld_rsquare_indexsnp_vcf(index_pos,vcf_file,region,tabix_path="tabix",ignore_
 #    print >> sys.stderr, "Error: while calculating LD from VCF file: index SNP is not a SNP - ref allele was %s, alt allele was %s" % (index_ref,index_alt)
 #    return
 
-  # Now grab the other SNPs, and calculate r2 with each of them. 
+  # Now grab the other SNPs, and calculate r2 with each of them.
   p = subprocess.Popen([tabix_path,vcf_file,region],stdout=subprocess.PIPE,stderr=subprocess.PIPE)
   (stdout,stderr) = p.communicate()
-  
+
   if stderr != '':
     print >> sys.stderr, "Error: while calculating LD from VCF file: tabix generated an error: \n%s" % stderr
     return
 
-  # Create a temporary file to write LD to. 
+  # Create a temporary file to write LD to.
   ld_filename = "templd_%s_%s_%s-%s.txt" % (
     chrom,
     index_pos,
@@ -144,7 +144,7 @@ def ld_rsquare_indexsnp_vcf(index_pos,vcf_file,region,tabix_path="tabix",ignore_
       rec[-1] = rec[-1].rstrip()
 
 #     Commented out for plotting indels that are biallelic
-#      # Is this a SNP? 
+#      # Is this a SNP?
 #      (rec_ref,rec_alt) = rec[3:5]
 
 #      if len(rec_ref) != 1:
@@ -152,7 +152,7 @@ def ld_rsquare_indexsnp_vcf(index_pos,vcf_file,region,tabix_path="tabix",ignore_
 #      elif len(rec_alt) != 1:
 #        continue
 
-      # Did it pass filters? 
+      # Did it pass filters?
       if not ignore_filter:
         rec_pass = rec[6]
         if rec_pass != "PASS":
@@ -167,7 +167,7 @@ def ld_rsquare_indexsnp_vcf(index_pos,vcf_file,region,tabix_path="tabix",ignore_
       if pos == index_pos:
         continue
 
-      # Have we seen this variant already? 
+      # Have we seen this variant already?
       if seen.get((chr,pos)) is not None:
         print >> sys.stderr, "Warning: multiple variants at same position (%s) in VCF file, using the first variant" % chrpos
         continue
