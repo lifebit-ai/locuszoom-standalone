@@ -2,17 +2,17 @@
 
 #===============================================================================
 # Copyright (C) 2010 Ryan Welch, Randall Pruim
-# 
+#
 # LocusZoom is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
-# 
+#
 # LocusZoom is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #===============================================================================
@@ -23,7 +23,7 @@ import sys
 # Fix path of script to be absolute.
 sys.argv[0] = os.path.abspath(sys.argv[0])
 
-# Add the locuszoom bin/ to the PATH. 
+# Add the locuszoom bin/ to the PATH.
 LZ_ROOT = os.path.abspath(os.path.join(os.path.dirname(sys.argv[0]),".."))
 LZ_BIN = os.path.join(LZ_ROOT,"bin")
 os.environ['PATH'] = LZ_BIN + os.pathsep + os.environ['PATH']
@@ -51,7 +51,7 @@ from verboseparser import *
 from cStringIO import StringIO
 from ordered_set import OrderedSet
 
-# Try importing modules that may not exist on a user's machine. 
+# Try importing modules that may not exist on a user's machine.
 try:
   import gzip
 except:
@@ -92,16 +92,16 @@ M2ZFAST_TITLE = [
   "from GWA scans or candidate gene studies"
 ]
 
-# Program constants. 
+# Program constants.
 M2ZFAST_CONF = "conf/m2zfast.conf"
 DEFAULT_SNP_FLANK = "200kb"
 DEFAULT_GENE_FLANK = "20kb"
 RE_SNP_1000G = re.compile("(chr)?([0-9a-zA-z]+):([0-9]+).*")
 RE_SNP_RS = re.compile("rs(\d+)")
 M2ZCL_FIRST = False
-MULTI_CAP = 8; 
+MULTI_CAP = 8;
 
-# Database constants. 
+# Database constants.
 SQLITE_SNP_POS = "snp_pos"
 SQLITE_REFFLAT = "refFlat"
 SQLITE_KNOWNGENE = "knownGene"
@@ -145,7 +145,7 @@ def getLDInfo(pop,source,build,ld_db):
         # Success! File paths are known for this DB/build/population trio.
         return node[pop]
 
-  # If we make it here, the supplied combination of source/build/pop is not supported. 
+  # If we make it here, the supplied combination of source/build/pop is not supported.
   return None
 
 def getGWASCat(build,code,gwas_cats):
@@ -171,14 +171,14 @@ def printGWACatalogs(cat_db,build):
   table.set_field_align('Option','l')
   table.set_field_align('Description','l')
 
-  exists = False;  
+  exists = False;
   for cat_code, cat_tree in tree.iteritems():
     table.add_row([
       cat_code,
       cat_tree['desc']
     ])
     exists = True
-    
+
   if exists:
     table.printt()
   else:
@@ -189,8 +189,8 @@ def getAllGWACatalogs(cat_db):
   table.set_field_align('Build','l')
   table.set_field_align('Description','l')
   table.set_field_align('--gwas-cat','l')
- 
-  exists = False;  
+
+  exists = False;
   for build in cat_db:
     tree = cat_db.get(build)
 
@@ -200,15 +200,15 @@ def getAllGWACatalogs(cat_db):
         cat_code,
         cat_tree['desc']
       ])
-      
+
       exists = True
-      
+
   if exists:
     return table.get_string()
   else:
-    return; 
+    return;
 
-# Print a list of all supported population/build/database combinations. 
+# Print a list of all supported population/build/database combinations.
 def printSupportedTrios(ld_db):
   print "Genotype files available for: "
   print getSupportedTrios(ld_db)
@@ -221,12 +221,12 @@ def getSupportedTrios(ld_db):
       lines += ["  --build %s" % build]
       for pop in ld_db[source][build]:
         lines += ["    --pop %s" % pop]
-  
+
     lines += [""]
-  
+
   lines.pop()
   s = os.linesep.join(lines)
-  
+
   return s
 
 def parse_rargs(arg_list):
@@ -259,7 +259,7 @@ def parse_rargs(arg_list):
 #      result.append(args[i])
 #    elif args[i] == "=":
 #      result.append(args[i-1] + "=" + args[i + 1])
-#      
+#
 #  d = dict()
 #  for e in result:
 #    (arg, val) = e.split("=")
@@ -313,33 +313,33 @@ def parse1000G(snp):
       pos = long(pos)
     except:
       return None
-    
+
     return (chrom,pos)
   else:
     return None
 
-# Pretty string for chromosome/start/stop interval. 
+# Pretty string for chromosome/start/stop interval.
 def regionString(chr,start,end):
   return "chr%s:%s-%s" % (str(chr),str(start),str(end))
 
-# Delete a directory and all files underneath. 
+# Delete a directory and all files underneath.
 def kill_dir(d):
   def report_error(function,path,excinfo):
     msg = None
     if excinfo is not None:
       msg = str(excinfo[1])
-      
+
     print >> sys.stderr, "Error: could not remove: %s, message was: %s" % (
       path,
       msg
     )
-    
+
   if os.path.isdir(d):
     rmtree(d,onerror=report_error)
   else:
     print >> sys.stderr, "Error: could not remove %s, not a directory." % d
 
-# Pretty string for a given number of seconds. 
+# Pretty string for a given number of seconds.
 def timeString(seconds):
   tuple = time.gmtime(seconds)
   days = tuple[2] - 1
@@ -356,7 +356,7 @@ def timeString(seconds):
   return string
 
 def transSNP(snp,db_file):
-  # If this isn't a rs# SNP, it has no translation. 
+  # If this isn't a rs# SNP, it has no translation.
   if not isRSID(snp):
     return snp
 
@@ -382,7 +382,7 @@ def transSNP(snp,db_file):
     print >> sys.stderr, "Warning: %s is not the current name in genome build (should be: %s)" % (snp,new_name)
     return new_name
 
-# Given a gene, return info for it from the database. 
+# Given a gene, return info for it from the database.
 def findGeneInfo(gene,db_file):
   con = sqlite3.connect(db_file)
   cur = con.execute("SELECT chrom,txStart,txEnd,cdsStart,cdsEnd FROM %s WHERE geneName='%s'" % (SQLITE_REFFLAT,gene))
@@ -392,10 +392,10 @@ def findGeneInfo(gene,db_file):
     d = cur.fetchone()
     if d is None:
       break
-    
+
     # Turn row into dictionary object.
     d = dict(zip([i[0] for i in cur.description],d))
-    
+
     # This block of code basically picks out the largest isoform
     # as the one we'll use for txstart/txend.
     if row is None:
@@ -412,34 +412,34 @@ def findGeneInfo(gene,db_file):
     else:
       row['chrom'] = chrom
 
-  # Return row, with fixed chromosome (see chrom2chr function.) 
+  # Return row, with fixed chromosome (see chrom2chr function.)
   return row
 
 class PosLookup:
-  def __init__(self,db_file):  
+  def __init__(self,db_file):
     if not os.path.isfile(db_file):
       sys.exit("Error: could not locate SQLite database file: %s. Check conf file setting SQLITE_DB." % db_file)
-      
+
     self.db = sqlite3.connect(db_file)
     self.execute = self.db.execute
-    
+
     self.execute("""
       CREATE TEMP VIEW snp_pos_trans AS SELECT rs_orig as snp,chr,pos FROM %s p INNER JOIN %s t ON (t.rs_current = p.snp)
     """ % (SQLITE_SNP_POS,SQLITE_TRANS))
-    
+
     self.query = """
       SELECT snp,chr,pos FROM snp_pos_trans WHERE snp='%s'
     """
 
   def __call__(self,snp):
     snp = str(snp)
-    
+
     # If the SNP is a 1000G SNP, it already knows its chrom/pos by definition,
-    # i.e. the SNP will be chr4:91941. 
+    # i.e. the SNP will be chr4:91941.
     gcheck = parse1000G(snp)
     if gcheck:
       return gcheck
-    
+
     cur = self.execute(self.query % snp)
     chr = None
     pos = None
@@ -456,7 +456,7 @@ class PosLookup:
 
     return (chr,pos)
 
-# Given a list of header elements, determine if col_name is among them. 
+# Given a list of header elements, determine if col_name is among them.
 def findCol(header_elements,col_name):
   for i in xrange(len(header_elements)):
     if header_elements[i] == col_name:
@@ -475,9 +475,9 @@ def is_gzip(file):
     pass
   finally:
     f.close()
-  
+
   return b
-  
+
 def is_bz2(file):
   try:
     f = bz2.BZ2File(file)
@@ -499,7 +499,7 @@ def is_bz2(file):
 def read_metal(metal_file,snp_column,pval_column,no_transform,chr,start,end,db_file,delim):
   region = "chr%s:%s-%s" % (str(chr),start,end)
   output_file = "temp_metal_%s_%s.txt" % (region.replace(":","_"),tempfile.mktemp(dir=""))
-  
+
   con = sqlite3.connect(db_file)
   query = """
     SELECT rs_orig as snp,chr,pos
@@ -508,7 +508,7 @@ def read_metal(metal_file,snp_column,pval_column,no_transform,chr,start,end,db_f
     WHERE chr = %(chr)i AND pos < %(end)i AND pos > %(start)i
   """ % {'snp_table':SQLITE_SNP_POS,'trans_table':SQLITE_TRANS,'chr':chr,'end':end,'start':start}
   cur = con.execute(query)
-  
+
   sptable = {}
   while 1:
     row = cur.fetchone()
@@ -540,7 +540,7 @@ def read_metal(metal_file,snp_column,pval_column,no_transform,chr,start,end,db_f
   metal_header = f.next().split(delim)
   metal_header[-1] = metal_header[-1].rstrip()
 
-  snp_col = None; 
+  snp_col = None;
   if snp_column is not None:
     if type(snp_column) == type(str()):
       snp_col = findCol(metal_header,snp_column)
@@ -564,25 +564,25 @@ def read_metal(metal_file,snp_column,pval_column,no_transform,chr,start,end,db_f
     elif type(pval_column) == type(int()):
       pval_col = pval_column
     else:
-      die("Error: pval column specified with something other than a string or integer: %s" % str(pval_column)); 
+      die("Error: pval column specified with something other than a string or integer: %s" % str(pval_column));
 
   # We still couldn't find the p-value column. FAIL!
   if pval_col is None:
     die("Error: could not locate p-value column in data, column name I'm looking for is: %s. Is your delimiter correct?" % (pval_column))
-  
+
   out = open(output_file,"w")
   print >> out, "\t".join(["chr","pos"] + metal_header)
   format_str = "\t".join(["%i","%i"] + ["%s" for i in xrange(len(metal_header))])
-  
+
   # P-value check functions
   pval_checks = [
     lambda x: x.is_finite()
   ]
 
   if not no_transform:
-    # If we're transforming to -log10, p-values coming in should be > 0. 
+    # If we're transforming to -log10, p-values coming in should be > 0.
     pval_checks.append(lambda x: x > 0)
-  
+
   found_in_region = False
   found_chrpos = False
   min_snp = None
@@ -590,10 +590,10 @@ def read_metal(metal_file,snp_column,pval_column,no_transform,chr,start,end,db_f
   marker_count = 0
   invalid_pval_count = 0
   for line in f:
-    # Skip blank lines. 
+    # Skip blank lines.
     if line.rstrip() == "":
       continue
-    
+
     e = line.split(delim)
     e[-1] = e[-1].rstrip()
 
@@ -606,7 +606,7 @@ def read_metal(metal_file,snp_column,pval_column,no_transform,chr,start,end,db_f
       found_chrpos = True
       gchr = gcheck[0]
       gpos = gcheck[1]
-      
+
       if gchr == int(chr) and gpos > int(start) and gpos < int(end):
         sptable.setdefault(snp,(gchr,gpos))
 
@@ -616,22 +616,22 @@ def read_metal(metal_file,snp_column,pval_column,no_transform,chr,start,end,db_f
 
       # Insert fixed log10 p-value
       pval = e[pval_col]
-  
-      if is_number(pval):     
+
+      if is_number(pval):
         dec_pval = decimal.Decimal(pval)
-        
+
         pval_ok = all((f(dec_pval) for f in pval_checks))
         if not pval_ok:
           print >> sys.stderr, "Warning: marker %s has invalid p-value: %s, skipping.." % (snp,str(pval))
           continue
-      
+
         if dec_pval < min_pval:
           min_snp = snp
-          min_pval = dec_pval; 
-          
+          min_pval = dec_pval;
+
         if not no_transform:
           e[pval_col] = str(-1*dec_pval.log10())
-        
+
         (schr,spos) = sptable.get(snp)
         e[snp_col] = "chr%i:%i" % (schr,spos)
         elements = (schr,spos) + tuple(e)
@@ -644,7 +644,7 @@ def read_metal(metal_file,snp_column,pval_column,no_transform,chr,start,end,db_f
 
   if invalid_pval_count > 0:
     print >> sys.stderr, "Warning: of %i markers in the region, %i had invalid or missing p-values" % (marker_count,invalid_pval_count)
-  
+
   if found_chrpos:
     print >> sys.stderr, ""
     print >> sys.stderr, fill("WARNING: your association results file has "
@@ -716,11 +716,11 @@ def read_epacts(epacts_file,chr,start,end,chr_col,beg_col,end_col,pval_col,no_tr
   if f is None:
     raise IOError, "Unknown error while loading EPACTS file, contact developer with this traceback"
 
-  # Find column indices. 
+  # Find column indices.
   epacts_header = f.next().split("\t")
   epacts_header[-1] = epacts_header[-1].rstrip()
 
-  # Find chr/begin/end columns. 
+  # Find chr/begin/end columns.
   try:
     i_chr_col = epacts_header.index(chr_col)
     i_begin_col = epacts_header.index(beg_col)
@@ -740,8 +740,8 @@ def read_epacts(epacts_file,chr,start,end,chr_col,beg_col,end_col,pval_col,no_tr
   out = open(output_file,"w")
   print >> out, "\t".join(['chr','pos','MarkerName','P-value'] + extra_cols)
   format_str = "\t".join(['%s','%i','%s','%s'] + ["%s" for _ in xrange(len(extra_cols))])
-  
-  # Arbitrary arithmetic precision  
+
+  # Arbitrary arithmetic precision
   decimal.getcontext().prec = 8
 
   # P-value check functions
@@ -750,7 +750,7 @@ def read_epacts(epacts_file,chr,start,end,chr_col,beg_col,end_col,pval_col,no_tr
   ]
 
   if not no_transform:
-    # If we're transforming to -log10, p-values coming in should be > 0. 
+    # If we're transforming to -log10, p-values coming in should be > 0.
     pval_checks.append(lambda x: x > 0)
 
   found_in_region = False
@@ -760,10 +760,10 @@ def read_epacts(epacts_file,chr,start,end,chr_col,beg_col,end_col,pval_col,no_tr
   marker_count = 0
   invalid_pval_count = 0
   for line in f:
-    # Skip blank lines. 
+    # Skip blank lines.
     if line.rstrip() == "":
       continue
-    
+
     e = line.split("\t")
     e[-1] = e[-1].rstrip()
 
@@ -782,13 +782,13 @@ def read_epacts(epacts_file,chr,start,end,chr_col,beg_col,end_col,pval_col,no_tr
 #      continue
 
     if file_chrom == chr and file_begin >= start and file_end <= end:
-      # Did we find a SNP in this region at all? 
+      # Did we find a SNP in this region at all?
       found_in_region = True
       marker_count += 1
 
       pval = e[i_pval_col]
-  
-      if is_number(pval):     
+
+      if is_number(pval):
         dec_pval = decimal.Decimal(pval)
 
         pval_ok = all((f(dec_pval) for f in pval_checks))
@@ -798,8 +798,8 @@ def read_epacts(epacts_file,chr,start,end,chr_col,beg_col,end_col,pval_col,no_tr
 
         if dec_pval < min_pval:
           min_snp = marker_name
-          min_pval = dec_pval; 
-          
+          min_pval = dec_pval;
+
         if not no_transform:
           pval = str(-1*dec_pval.log10())
 
@@ -819,7 +819,7 @@ def read_epacts(epacts_file,chr,start,end,chr_col,beg_col,end_col,pval_col,no_tr
 
   return found_in_region, output_file, min_snp
 
-# Runs the R script which actually generates the plot. 
+# Runs the R script which actually generates the plot.
 def runM2Z(metal,metal2zoom_path,ld_files,refsnp,chr,start,end,no_snp_name,verbose,opts,args=""):
   conf = getConf()
 
@@ -827,7 +827,7 @@ def runM2Z(metal,metal2zoom_path,ld_files,refsnp,chr,start,end,no_snp_name,verbo
   if rscript_path is None:
     die("Error: could not locate Rscript interpreter. It either needs to be located on your PATH, or set on the configuration file.")
 
-  # If no LD file was created, make m2z use the database instead. 
+  # If no LD file was created, make m2z use the database instead.
   refsnp_ld = "NULL"
   cond_ld = ""
   if (ld_files is None) or (len(ld_files) == 0):
@@ -841,7 +841,7 @@ def runM2Z(metal,metal2zoom_path,ld_files,refsnp,chr,start,end,no_snp_name,verbo
         cond_ld = "cond_ld=" + ",".join(ld_files[1:])
       else:
         cond_ld = ""
-  
+
   cond_pos = ""
   cond_snps = ""
   if opts.condsnps is not None:
@@ -877,7 +877,7 @@ def runM2Z(metal,metal2zoom_path,ld_files,refsnp,chr,start,end,no_snp_name,verbo
     proc = Popen(com,shell=True)
   else:
     proc = Popen(com,shell=True,stdout=PIPE,stderr=PIPE)
-    
+
   proc.wait()
 
   if proc.returncode != 0:
@@ -885,13 +885,13 @@ def runM2Z(metal,metal2zoom_path,ld_files,refsnp,chr,start,end,no_snp_name,verbo
 
 # Attemps to delete a list of files.
 # Prints a warning if a file could not be deleted, but does not throw
-# an exception. 
+# an exception.
 def cleanup(files):
   if _DEBUG:
     print "cleanup() called for files: "
     for f in files:
       print ".. %s" % f
-  
+
   def check_file(f):
     return (f is not None) and (f != '') and (f != "NULL") and (f != '/')
 
@@ -916,23 +916,23 @@ def safe_int(x):
 
   return x
 
-# Reads a "hitspec" or batch run configuration file. 
-# The file has 6 columns: 
+# Reads a "hitspec" or batch run configuration file.
+# The file has 6 columns:
 # 0 - snp or gene
 # 1 - chromosome
 # 2 - start
 # 3 - stop
-# 4 - flank 
+# 4 - flank
 # 5 - run?
 # 6 - m2zargs
-# 
-# Each row is for a SNP or gene, specified in column 0. 
-# Either chr/start/stop or flank must be specified in each row. 
-# If neither is specified, a default flank is used (see DEFAULT_*_FLANK variables.) 
+#
+# Each row is for a SNP or gene, specified in column 0.
+# Either chr/start/stop or flank must be specified in each row.
+# If neither is specified, a default flank is used (see DEFAULT_*_FLANK variables.)
 # Missing values should be entered as "NA"
-# Column 5 is either 'yes' or 'no' denoting whether or not this snp/gene should be plotted. 
-# The final column contains a list of arguments to be passed to locuszoom.R, separated by whitespace. 
-# The entire file is whitespace delimited. 
+# Column 5 is either 'yes' or 'no' denoting whether or not this snp/gene should be plotted.
+# The final column contains a list of arguments to be passed to locuszoom.R, separated by whitespace.
+# The entire file is whitespace delimited.
 def readWhitespaceHitList(file,db_file):
   if not os.path.isfile(file):
     die("Could not open hitspec file for reading - check your path.")
@@ -948,14 +948,14 @@ def readWhitespaceHitList(file,db_file):
 
   snplist = []
   for line in f:
-    # Skip blank lines. 
+    # Skip blank lines.
     if line.strip() == "":
       print >> sys.stderr, "Warning: skipping blank line in hitspec file.."
       continue
 
     e = line.split()
     e[-1] = e[-1].strip()
-    
+
     if len(e) < 6:
       print >> sys.stderr, "Error: hitspec line not formatted properly, missing the proper number of columns on line #%i: %s" (lineno,str(line))
       continue
@@ -979,8 +979,8 @@ def readWhitespaceHitList(file,db_file):
       if flank is None:
         die("Error: could not parse flank \"%s\", format incorrect." % e[4])
 
-    # If they messed up and put "RS" instead of "rs" in the SNP name, fix it. 
-    # The only case in which I can't be sure to fix it is if the gene is RS1. 
+    # If they messed up and put "RS" instead of "rs" in the SNP name, fix it.
+    # The only case in which I can't be sure to fix it is if the gene is RS1.
     if snp != "RS1":
       snp = re.sub("^RS(\d+)","rs\\1",snp)
 
@@ -989,7 +989,7 @@ def readWhitespaceHitList(file,db_file):
       snp.tsnp = transSNP(snp.snp,db_file)
       (snp.chr,snp.pos) = find_pos(snp.tsnp)
       snp.chrpos = "chr%s:%s" % (snp.chr,snp.pos)
-        
+
     if flank is not None and flank != "NA":
       if isSNP(snp):
         fchr = snp.chr
@@ -1006,13 +1006,13 @@ def readWhitespaceHitList(file,db_file):
           continue
       else:
         gene_info = findGeneInfo(snp,db_file)
-    
+
         if gene_info is not None:
           if m2z_args is None:
             m2z_args = "requiredGene=%s" % snp
           else:
-            m2z_args += " requiredGene=%s" % snp;        
-  
+            m2z_args += " requiredGene=%s" % snp;
+
           chr = gene_info['chrom']
           start = gene_info['txStart'] - flank
           end = gene_info['txEnd'] + flank
@@ -1024,7 +1024,7 @@ def readWhitespaceHitList(file,db_file):
           except:
             print >> sys.stderr, "Error: no known SNP or gene present in first column, and invalid chr/start/end given in hitspec file."
             continue
-          
+
           snp = regionString(chr,start,end)
     else:
       try:
@@ -1042,7 +1042,7 @@ def readWhitespaceHitList(file,db_file):
       except:
         print >> sys.stderr, "Error: invalid start/end in hitspec file, line was: '%s'" % " ".join(e)
         continue
-      
+
       # If something wasn't given in the SNP/gene column, need a placeholder.
       if not isSNP(snp) and findGeneInfo(snp,db_file) is None:
         snp = regionString(chr,start,end)
@@ -1089,7 +1089,7 @@ def printOpts(opts):
   table = PrettyTable(['Option','Value'])
   table.set_field_align('Option','l')
   table.set_field_align('Value','l')
-  
+
   if opts.metal:
     table.add_row(['metal',os.path.split(opts.metal)[1]])
     table.add_row(['markercol',opts.snpcol])
@@ -1119,7 +1119,7 @@ def printOpts(opts):
     'flank','build','ld','ld_measure','pop','source','snpset','db','gene_table','cache',
     'no_clean','no_transform','enable_db_annot','verbose','m2zpath','plotonly'
   ])
- 
+
   if opts.ld_vcf:
     table.add_row(['ld-vcf',os.path.split(opts.ld_vcf)[1]])
     display_opts = display_opts - {"pop","source"}
@@ -1133,20 +1133,20 @@ def printOpts(opts):
     if val is not None and val:
       opt = opt.replace("_","-")
       table.add_row([opt,str(val)])
-    
+
   table.printt()
 
 def printArgs(args):
   table = PrettyTable(['Option','Value'])
   table.set_field_align('Option','l')
   table.set_field_align('Value','l')
-  
+
   d = parse_rargs(args)
   del d["markerCol"]
   del d["pvalCol"]
   for i,j in d.iteritems():
     table.add_row([str(i),str(j)])
-  
+
   table.printt()
 
 class SNP:
@@ -1156,13 +1156,13 @@ class SNP:
     self.chrpos = chrpos;   # "chrpos" name for SNP, e.g. chr#:###
     self.chr = chr;         # chromosome
     self.pos = pos;         # position
-  
+
   def __str__(self):
     return self.snp
 
 def parse_denote_marker_file(filepath,sqlite_file):
   find_pos = PosLookup(sqlite_file)
-  
+
   out_name = "temp_denote_marker_" + tempfile.mktemp(dir="")
   with open(filepath) as f:
     with open(out_name,'w') as out:
@@ -1203,11 +1203,11 @@ def parse_denote_marker_file(filepath,sqlite_file):
 # opts - settings that are specific to the program and have been error-checked
 # opts looks like an object, settings are of the form: opt.some_setting
 # args - all command line arguments that were positional, these are not checked
-# and are immediately passed on to locuszoom.R 
+# and are immediately passed on to locuszoom.R
 def getSettings():
   global M2ZFAST_CONF
 
-  # We have to figure out where conf is located first because the help is generated based on it. 
+  # We have to figure out where conf is located first because the help is generated based on it.
   for i, f in enumerate(sys.argv):
     if f == '--conf':
       conf_path = sys.argv[i+1]
@@ -1220,7 +1220,7 @@ def getSettings():
   conf = getConf()
 
   usage = "usage: locuszoom [options]"
-  
+
   parser = VerboseParser(usage=usage)
   parser.add_option("--metal",dest="metal",help="Metal file.")
   parser.add_option("--epacts",dest="epacts",help="EPACTS results file.")
@@ -1260,19 +1260,19 @@ def getSettings():
     spacer = "".join([os.linesep]*2),
     tables = getAllGWACatalogs(conf.GWAS_CATS)
   )
-  
+
   parser.add_option("--gwas-cat",dest="gwas_cat",help=gwas_help)
-  
+
   parser.add_option("--build",dest="build",help="NCBI build to use when looking up SNP positions, and for selecting the correct dataset to use for LD calculations.")
-  
+
   pop_help = "Population to use for LD. This option, and the --source option below, have the following available options: {spacer}{trios}".format(
     spacer = "".join([os.linesep]*2),
     trios = getSupportedTrios(conf.LD_DB)
   )
-  
+
   parser.add_option("--pop",dest="pop",help=pop_help)
   parser.add_option("--source",dest="source",help="Source to use for LD (defaults to hapmap.) See above for more available options.")
-  
+
   parser.add_option("--snpset",dest="snpset",help="Set of SNPs to plot as a rug.")
   parser.add_option("--no-snp-name",dest="no_snp_name",default=False,action="store_true",help="Remove reference SNP name from plots.")
   parser.add_option("--no-cleanup",dest="no_clean",action="store_true",help="Leave temporary files generated by this script. This does not affect clobber or clean in locuszoom.R.")
@@ -1306,7 +1306,7 @@ def getSettings():
     plotonly = False,
     prefix = None,
     pvalcol = "P-value",
-    snpcol = "MarkerName", 
+    snpcol = "MarkerName",
     verbose = False,
     pop = None,
     snpset = "Illu1M",
@@ -1329,11 +1329,11 @@ def getSettings():
     if os.path.isfile(opts.m2zpath):
       print "Overriding locuszoom.R path: %s" % opts.m2zpath
       opts.metal2zoom_path = os.path.abspath(os.path.expanduser(opts.m2zpath))
-      
+
       opts.metal2zoom_path = find_systematic(opts.metal2zoom_path)
       if opts.metal2zoom_path is None:
         die("Error: could not find locuszoom.R - check conf file %s" % M2ZFAST_CONF)
-      
+
     else:
       print "locuszoom.R override specified, but path \'%s\' does not exist - using default." % opts.m2zpath
       print "Current directory is: %s" % os.getcwd()
@@ -1346,8 +1346,8 @@ def getSettings():
   if opts.exper:
     opts.verbose = True
     globals()['_DEBUG'] = True
-  
-  # Did they specify a SQLite database to use? 
+
+  # Did they specify a SQLite database to use?
   if opts.db:
     if os.path.isfile(opts.db):
       opts.sqlite_db_file = os.path.abspath(opts.db)
@@ -1358,7 +1358,7 @@ def getSettings():
     if not os.path.isfile(opts.sqlite_db_file):
       die("Error: could not locate sqlite database, tried: %s, check your conf file" % str(opts.sqlite_db_file))
 
-  # SNP position looker-upper. 
+  # SNP position looker-upper.
   find_pos = PosLookup(opts.sqlite_db_file)
 
   # If a temporary directory was specified, it better exist!
@@ -1375,8 +1375,8 @@ def getSettings():
   mode_count = sum(map(lambda x: x is not None,[opts.hitspec,opts.refgene]))
   if mode_count > 1:
     die_help("Must specify either --refgene or --hitspec. These options are mutually exclusive.",parser)
-  
-  # Perform checks on input file. 
+
+  # Perform checks on input file.
   if opts.metal is not None:
     if opts.metal != "-":
       input_file = find_systematic(opts.metal)
@@ -1533,15 +1533,15 @@ def getSettings():
   else:
     opts.gwas_cat_file = None
 
-  # Change refSNP into a chr:pos SNP. 
+  # Change refSNP into a chr:pos SNP.
   if opts.refsnp:
     opts.refsnp = SNP(snp=opts.refsnp)
     opts.refsnp.tsnp = transSNP(opts.refsnp.snp,opts.sqlite_db_file)
     (chr,pos) = find_pos(opts.refsnp.tsnp)
-  
+
     if chr is None or pos is None:
       die("Error: could not find chr/pos information for SNP %s in database." % opts.refsnp)
-    
+
     opts.refsnp.chrpos = "chr%s:%s" % (chr,pos)
     opts.refsnp.chr = chr
     opts.refsnp.pos = pos
@@ -1566,15 +1566,15 @@ def getSettings():
 
     opts.condsnps = cond_snps_chrpos
 
-  # If specified, check the denote markers file. 
+  # If specified, check the denote markers file.
   if opts.denote_markers_file:
     denote_file = find_systematic(opts.denote_markers_file)
     if denote_file is None:
       die("Error: could not find file specified by --denote-markers-file: %s" % opts.denote_markers_file)
     else:
       opts.denote_markers_file = denote_file
-  
-  # Check BED tracks. 
+
+  # Check BED tracks.
   if opts.bed_tracks:
     bed_tracks = find_systematic(opts.bed_tracks)
     if bed_tracks is None:
@@ -1600,37 +1600,37 @@ def getSettings():
           "chr" + str(chr) + ":" + str(pos)
         )
         die(msg)
-        
+
     elif opts.refgene:
       refgene_info = findGeneInfo(opts.refgene,opts.sqlite_db_file)
       if refgene_info is None:
         die("Error: gene selected for plotting was not found in refFlat.")
-  
+
       flank = opts.flank
       if opts.flank is None:
         flank = convertFlank(DEFAULT_GENE_FLANK)
-        
+
       gene_rs = refgene_info['txStart'] - flank
       gene_re = refgene_info['txEnd'] + flank
-  
+
       opts.snplist.append((
         opts.refsnp,
         refgene_info['chrom'],
         gene_rs,
         gene_re,
       ))
-      
+
     elif opts.flank:
       opts.snplist.append( (opts.refsnp,chr,pos-opts.flank,pos+opts.flank) )
-      
+
     else:
       print "No flank, chr/start/stop, or reference gene given, using default flank of %s.." % DEFAULT_SNP_FLANK
       def_flank = convertFlank(DEFAULT_SNP_FLANK)
       opts.snplist.append( (opts.refsnp,chr,pos-def_flank,pos+def_flank) )
-      
+
   elif opts.hitspec:
     opts.snplist = readWhitespaceHitList(opts.hitspec,opts.sqlite_db_file)
-  
+
   elif opts.refgene:
     refgene_info = findGeneInfo(opts.refgene,opts.sqlite_db_file)
     if refgene_info is None:
@@ -1639,7 +1639,7 @@ def getSettings():
     flank = opts.flank
     if opts.flank is None:
       flank = convertFlank(DEFAULT_GENE_FLANK)
-      
+
     gene_rs = refgene_info['txStart'] - flank
     gene_re = refgene_info['txEnd'] + flank
 
@@ -1658,7 +1658,7 @@ def getSettings():
       int(opts.start),
       int(opts.end),
     ))
-  
+
   else:
     die("Error: you must specify one of these options: \n"
         "--refsnp\n"
@@ -1672,12 +1672,12 @@ def getSettings():
     (cache_path,cache_file) = os.path.split(opts.cache)
     if cache_path == '':
       cache_path = ".."
-  
+
     opts.cache = os.path.join(cache_path,cache_file)
   else:
     opts.cache = None
 
-  # Do we need to add snpcol and pvalcol to the m2z args? 
+  # Do we need to add snpcol and pvalcol to the m2z args?
   if opts.snpcol is not None:
     args.append("markerCol=%s" % opts.snpcol)
 
@@ -1689,7 +1689,7 @@ def getSettings():
     print >> sys.stderr, "Warning: overriding --snpset %s with option given as snpset=%s.." % (opts.snpset,m2zargs['snpset'])
     opts.snpset = m2zargs['snpset']
 
-  # Print warnings about deprecated options. 
+  # Print warnings about deprecated options.
   if opts.offline:
     print >> sys.stderr, "Warning: --offline no longer required, option will be ignored.."
 
@@ -1697,7 +1697,7 @@ def getSettings():
 
 # On Unix: use gunzip to decompress a gzipped file
 # On Windows: use gzip module to write gzipped file
-# If file "out" exists, appends to file. Otherwise creates a new file "out". 
+# If file "out" exists, appends to file. Otherwise creates a new file "out".
 def decompGZFile(file,out):
   if not os.path.isfile(file):
     raise ValueError, "Error: file does not exist: %s" % file
@@ -1707,7 +1707,7 @@ def decompGZFile(file,out):
       os.system("gunzip -c %s >> %s" % (file,out))
     else:
       os.system("gunzip -c %s > %s" % (file,out))
-  
+
     if not os.path.isfile(out) or os.path.getsize(out) < 1:
       raise Exception, "Error: could not decompress file %s" % file
   else:
@@ -1716,7 +1716,7 @@ def decompGZFile(file,out):
       out = open(out,"a")
     else:
       out = open(out,"w")
-    
+
     f = gzip.open(file)
     out.writelines(f)
     f.close()
@@ -1724,10 +1724,10 @@ def decompGZFile(file,out):
 
 def computeLD(snp,chr,start,end,build,pop,source,cache_file,fugue_cleanup,verbose):
   conf = getConf()
- 
+
   conf.NEWFUGUE_PATH = find_systematic(conf.NEWFUGUE_PATH)
   conf.PLINK_PATH = find_systematic(conf.PLINK_PATH)
- 
+
   ld_info = getLDInfo(pop,source,build,conf.LD_DB)
   if 'map_dir' in ld_info:
     settings = FugueSettings(
@@ -1744,7 +1744,7 @@ def computeLD(snp,chr,start,end,build,pop,source,cache_file,fugue_cleanup,verbos
   else:
     raise Exception, "Error: conf file specification for %s/%s/%s is invalid, please check syntax." % (pop,source,build)
 
-  # Check that LD program exists. 
+  # Check that LD program exists.
   if isinstance(settings,FugueSettings):
     if not os.path.exists(conf.NEWFUGUE_PATH):
       raise Exception, "Error: could not find %s for computing LD.." % conf.NEWFUGUE_PATH
@@ -1760,8 +1760,8 @@ def computeLD(snp,chr,start,end,build,pop,source,cache_file,fugue_cleanup,verbos
     cache = LDRegionCache(settings.createLDCacheKey(),cache_file)
   else:
     cache = None
-  
-  if isinstance(settings,FugueSettings): 
+
+  if isinstance(settings,FugueSettings):
     ld_finder = FugueFinder(settings,cache,fugue_cleanup,verbose)
   elif isinstance(settings,PlinkSettings):
     ld_finder = PlinkFinder(settings,cache,fugue_cleanup,verbose)
@@ -1770,12 +1770,12 @@ def computeLD(snp,chr,start,end,build,pop,source,cache_file,fugue_cleanup,verbos
     ld_success = ld_finder.compute(snp.chrpos,chr,start,end)
     if ld_success:
       ld_filename = "templd_" + snp.snp.replace(":","_").replace("/","") + "_" + time.strftime("%y%m%d",time.localtime()) + "-" + time.strftime("%H%M%S",time.localtime()) + ".txt"
-    
+
       if os.path.isfile(ld_filename):
         print >> sys.stderr, "Warning: LD file already exists for some reason: %s" % ld_filename
 
       write_success = ld_finder.write(ld_filename)
-    
+
       if not write_success:
         ld_filename = None
     else:
@@ -1798,37 +1798,37 @@ def computeLD(snp,chr,start,end,build,pop,source,cache_file,fugue_cleanup,verbos
 def fixUserLD(file,refsnp,db_file):
   # Create temporary file to write LD to.
   out = "temp_user_ld_" + tempfile.mktemp(dir="")
-  
-  # Open user LD file. 
+
+  # Open user LD file.
   if os.path.splitext(file)[1] == ".gz":
     f = gzip.open(file)
   else:
     f = open(file)
-  
+
   found_refsnp = False
-  
-  # Checks on LD file format. 
+
+  # Checks on LD file format.
   h = f.readline().lower().rstrip()
   h_s = h.split()
-  
+
   for column in ('snp1','snp2','dprime','rsquare'):
     try:
       exec "%s_col = h_s.index(column)" % column
     except:
       print >> sys.stderr, "Error: user-supplied LD file does not have column '%s' in header (or no header row exists.)" % column
       return None
-  
+
   find_pos = PosLookup(db_file)
-  
+
   out_file = open(out,"w")
   print >> out_file, h
   for line in f:
     e = line.rstrip().split()
-    
-    # If the line contains the refsnp, extract it. 
+
+    # If the line contains the refsnp, extract it.
     if line.find(refsnp.snp) != -1:
       found_refsnp = True
-      
+
       skip = False
       for col in (snp1_col,snp2_col):
         snp = e[col]
@@ -1838,13 +1838,13 @@ def fixUserLD(file,refsnp,db_file):
         else:
           print >> sys.stderr, "Warning: could not find position for SNP %s in user-supplied --ld file, skipping.." % str(snp)
           skip = True
-          
+
       if not skip:
         print >> out_file, " ".join(e)
-  
+
   f.close()
   out_file.close()
-  
+
   if found_refsnp:
     return out
   else:
@@ -1855,7 +1855,7 @@ def windows_file_replace_chars(name):
   bad_chars = "\\ / : * ? \" < > |".split()
   for c in bad_chars:
     name = name.replace(c,"_")
-  
+
   return name
 
 def windows_path_replace_chars(name):
@@ -1868,7 +1868,7 @@ def windows_path_replace_chars(name):
 def runQuery(query,args):
   hash = str(int(time.time())) + "_" + str(os.getpid())
   file = "%s_%s.txt" % (query.func_name,hash)
- 
+
   try:
     cur = query(*args)
   except:
@@ -1876,14 +1876,14 @@ def runQuery(query,args):
     print >> sys.stderr, "Error: SQL query failed, error was: %s" % error_msg
     cur = None
     file = None
-  
+
   count = 0
   if cur is not None:
     try:
       out = open(file,"w")
       count = print_results(cur,"\t",out)
       out.close()
-      
+
       if count <= 0:
         file = None
 
@@ -1901,7 +1901,7 @@ def listTables(db_file):
 
     res = cur.fetchall()
     tables = [str(i[0]) for i in res]
-    
+
     db.close()
   finally:
     db.close()
@@ -1910,16 +1910,16 @@ def listTables(db_file):
 
 def runQueries(chr,start,stop,snpset,build,db_file,do_annot,gene_table):
   results = {}
-  
+
   db = sqlite3.connect(db_file)
- 
+
   db_tables = listTables(db_file)
 
   if gene_table in db_tables:
     results['refFlat'] = runQuery(refflat_in_region,[db,gene_table,chr,start,stop,build])
   else:
     print >> sys.stderr, "Warning: gene table '%s' not found in database, skipping gene lookups in region" % gene_table
- 
+
   if do_annot:
     if all([x in db_tables for x in (SQLITE_SNP_POS,SQLITE_VAR_ANNOT)]):
       results['annot'] = runQuery(snp_annot_in_region,[db,SQLITE_SNP_POS,SQLITE_VAR_ANNOT,chr,start,stop,build])
@@ -1930,10 +1930,10 @@ def runQueries(chr,start,stop,snpset,build,db_file,do_annot,gene_table):
     results['recomb'] = runQuery(recomb_in_region,[db,SQLITE_RECOMB_RATE,chr,start,stop,build])
   else:
     print >> sys.stderr, "Warning: recombination rate table '%s' not found in database, skipping recomb rate lookups in region" % SQLITE_RECOMB_RATE
-    
+
   if all([x in db_tables for x in (SQLITE_SNP_POS,SQLITE_SNP_SET)]):
     results['snpsetFile'] = runQuery(snpset_in_region,[db,SQLITE_SNP_POS,SQLITE_SNP_SET,snpset,chr,start,stop,build])
-  
+
   return results
 
 def runAll(input_file,input_type,refsnp,chr,start,end,opts,args):
@@ -1942,7 +1942,7 @@ def runAll(input_file,input_type,refsnp,chr,start,end,opts,args):
   build = opts.build
   delim = opts.delim
   no_clean = opts.no_clean
-  
+
   print "Beginning plotting sequence for: %s" % str(refsnp)
   print "Extracting region of interest (%s) from input file.." % regionString(chr,start,end)
 
@@ -1952,8 +1952,8 @@ def runAll(input_file,input_type,refsnp,chr,start,end,opts,args):
     (bPocull,metal_temp,min_snp) = read_epacts(input_file,chr,start,end,opts.epacts_chrom_col,opts.epacts_beg_col,opts.epacts_end_col,opts.epacts_pval_col,opts.no_trans)
 
   ld_temp = None
-  
-  # If poculling does not give us any SNPs in the region, we're done. 
+
+  # If poculling does not give us any SNPs in the region, we're done.
   if not bPocull:
     print >> sys.stderr, "Error: region specified contains no SNPs, skipping.."
     if not no_clean:
@@ -1961,19 +1961,19 @@ def runAll(input_file,input_type,refsnp,chr,start,end,opts,args):
       cleanup([ld_temp,metal_temp])
     return; # hack
 
-  # If a gene was passed in, we need to tell M2Z it is a required gene to plot. 
+  # If a gene was passed in, we need to tell M2Z it is a required gene to plot.
   if not isSNP(refsnp):
     if findGeneInfo(refsnp,opts.sqlite_db_file) is not None:
       args += " requiredGene=\"%s\"" % str(refsnp)
 
   find_pos = PosLookup(opts.sqlite_db_file)
 
-  # If something other than a SNP was passed in, we need to find 
-  # the best SNP in the region. 
+  # If something other than a SNP was passed in, we need to find
+  # the best SNP in the region.
   if not isSNP(refsnp):
     print "Attempting to find best SNP in region.."
-    print "Found: %s" % min_snp;  
-    
+    print "Found: %s" % min_snp;
+
     refsnp = SNP(snp=min_snp)
     refsnp.tsnp = transSNP(min_snp,opts.sqlite_db_file)
     (best_chr,best_pos) = find_pos(refsnp.tsnp)
@@ -1981,16 +1981,16 @@ def runAll(input_file,input_type,refsnp,chr,start,end,opts,args):
     refsnp.pos = best_pos
     refsnp.chrpos = "chr%s:%s" % (best_chr,best_pos)
 
-  # Get refsnp position. 
-  # If a position cannot be found, bail out. 
+  # Get refsnp position.
+  # If a position cannot be found, bail out.
   if refsnp.pos is None:
     print >> sys.stderr, "Error: could not find position for %s, skipping.." % str(refsnp)
     if not no_clean:
       print "Deleting temporary files.."
       cleanup([ld_temp,metal_temp])
-    return; 
-  
-  # Should we calculate LD? 
+    return;
+
+  # Should we calculate LD?
   if not opts.no_ld:
     # Did the user supply an LD file? If so, we don't need to calculate it.
     if opts.ld:
@@ -2000,9 +2000,9 @@ def runAll(input_file,input_type,refsnp,chr,start,end,opts,args):
         return
     elif opts.ld_vcf:
       print "Using user-specified VCF file to calculate LD with reference SNP %s.." % str(refsnp)
-      
+
       ld_files = []
-     
+
       if '.json' in opts.ld_vcf:
         ld_vcf = opts.ld_vcf_dict.get(str(chr))
 
@@ -2025,7 +2025,7 @@ def runAll(input_file,input_type,refsnp,chr,start,end,opts,args):
     else:
       print "Finding pairwise LD with reference SNP %s.." % str(refsnp)
       print "Source: %s | Population: %s | Build: %s" % (opts.source,opts.pop,build)
-      
+
       ld_files = []
       ld_temp = computeLD(refsnp,chr,start,end,build,opts.pop,opts.source,opts.cache,not no_clean,opts.verbose)
       if ld_temp is not None:
@@ -2063,7 +2063,7 @@ def runAll(input_file,input_type,refsnp,chr,start,end,opts,args):
   pqueries = runQueries(chr,start,end,opts.snpset,build,opts.sqlite_db_file,opts.enable_db_annot,opts.gene_table)
 
   user_rargs = parse_rargs(shlex.split(args))
- 
+
   user_snpset = user_rargs.get('snpset')
   if user_snpset is not None and 'NULL' in user_snpset:
     user_rargs['snpsetFile'] = "NULL"
@@ -2072,7 +2072,7 @@ def runAll(input_file,input_type,refsnp,chr,start,end,opts,args):
     user_rargs['snpsetFile'] = "NULL"
 
   for m2zarg,file in pqueries.iteritems():
-    # If the user overrides any of the "pquery files", don't set it. 
+    # If the user overrides any of the "pquery files", don't set it.
     if m2zarg in user_rargs:
       continue
 
@@ -2082,7 +2082,7 @@ def runAll(input_file,input_type,refsnp,chr,start,end,opts,args):
       args += " %s=NULL" % m2zarg
 
   # Do we want to show annotations? If enable_db_annot is false, and the user hasn't specified
-  # their own columns in the metal/epacts file, then we should also pass showAnnot=F. 
+  # their own columns in the metal/epacts file, then we should also pass showAnnot=F.
   has_user_annot = re.search("showAnnot|annotPch|annotCol|annotOrder",args) is not None
   if not (has_user_annot or opts.enable_db_annot):
     args += " showAnnot=F"
@@ -2091,12 +2091,12 @@ def runAll(input_file,input_type,refsnp,chr,start,end,opts,args):
   if opts.gwas_cat_file is not None:
     args += " gwasHits=%s" % opts.gwas_cat_file
 
-  # Marker denote file. 
+  # Marker denote file.
   if opts.denote_markers_file:
     denote_file = parse_denote_marker_file(opts.denote_markers_file,opts.sqlite_db_file)
     args += " denoteMarkersFile=%s" % denote_file
-  
-  # BED tracks file. 
+
+  # BED tracks file.
   if opts.bed_tracks is not None:
     args += " bedTracks=%s" % opts.bed_tracks
 
@@ -2120,11 +2120,11 @@ def main():
   # Get command-line arguments and parse them for errors.
   opts,args = getSettings()
   print "Loading settings.."
-  
+
   print "Using configuration file: " + M2ZFAST_CONF
   conf = getConf()
 
-  # Print important options. 
+  # Print important options.
   print "Options in effect are:\n"
   printOpts(opts)
   print ""
@@ -2145,11 +2145,11 @@ def main():
   # Build parameter.
   args += " build=%s" % opts.build
 
-  # Tell locuszoom.R never to try using pquery. 
+  # Tell locuszoom.R never to try using pquery.
   args += " pquery=F"
 
-  # Always disable p-value transformation in R. 
-  # It is dangerous to leave it enabled - we don't always know what the R script will do. 
+  # Always disable p-value transformation in R.
+  # It is dangerous to leave it enabled - we don't always know what the R script will do.
   args += " alreadyTransformed=TRUE"
 
   # Change into runtime directory.
@@ -2158,7 +2158,7 @@ def main():
 
   os.chdir(opts.rundir)
 
-  # Single process mode - one plot generated at a time. 
+  # Single process mode - one plot generated at a time.
   if opts.multi == 1:
     # entry[0] - snp
     # entry[1] - chr
@@ -2203,7 +2203,7 @@ def main():
 
       # Setup the temporary directory.
       # If it exists already, it was used on a previous plotting run, and should
-      # be killed so as not to use the temporary files left in it on accident. 
+      # be killed so as not to use the temporary files left in it on accident.
       if os.path.isdir(temp_dir):
         kill_dir(temp_dir)
 
@@ -2217,7 +2217,7 @@ def main():
 
       # Change into our temporary directory. This is where files will be generated
       # while creating the plot. locuszoom.R, new_fugue, and m2zfast will all
-      # create files here. 
+      # create files here.
       os.chdir(temp_dir)
 
       # Get input file and type (metal, epacts)
@@ -2242,7 +2242,7 @@ def main():
         print >> sys.stderr, fill("Error: A sqlite3 disk error was caught - this is *usually* the "
                               "result of /tmp or /var/tmp being filled to capacity on the "
                               "machine, or a permissions error on the database file itself. ",80)
-        
+
         print >> sys.stderr, ""
 
         print >> sys.stderr, fill("You should check that /tmp or /var/tmp are not filled to "
@@ -2258,7 +2258,7 @@ def main():
         print >> sys.stderr, "The original error was:"
         raise
 
-      # Change back up to the parent directory where we started running from. 
+      # Change back up to the parent directory where we started running from.
       os.chdir("..")
 
       # If they only want the plot, move/rename the pdf and delete the directory created.
@@ -2292,11 +2292,11 @@ def main():
       se = time.time()
       print "Time required: %s\n" % (timeString(se - st))
 
-  # Generate plots simultaneously. Not planning on implementing this anytime soon. 
+  # Generate plots simultaneously. Not planning on implementing this anytime soon.
   elif opts.multi > 1:
     die("--multi not yet implemented.")
 
-# Call main if script is executed. 
+# Call main if script is executed.
 if __name__ == "__main__":
   main()
 
