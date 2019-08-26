@@ -282,7 +282,7 @@ def parse1000G(snp):
     return None
 
   c = snp.split(":")
-  if len(c) == 2:
+  if len(c) > 1:
     chr = chrom2chr(c[0])
     try:
       pos = long(c[1])
@@ -613,6 +613,7 @@ def read_metal(metal_file,snp_column,pval_column,no_transform,chr,start,end,db_f
         print >> out, format_str % elements
       else:
         invalid_pval_count += 1
+
 
   f.close()
   out.close()

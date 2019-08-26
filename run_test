@@ -1,0 +1,4 @@
+#!/bin/bash
+
+bin/locuszoom --experimental --no-date --no-ld --epacts tests/data/DIAGRAMv4_iSNPs_FUSION_1000G_MAR12_WLD_121012_PK_noindels_chrpos_tabdelim_test-region1.epacts.gz --refgene TCF7L2 --build hg19 --pop EUR --source 1000G_Nov2014 --prefix lz_test_barplot --no-cleanup barplotData=test_barplot_3.tab barplotMatchingLineColor=red barplotAxisLabel="TestLabel" barplotAxisTicks="0,0.5,1" barplotMinY=0 barplotMaxY=1
+
