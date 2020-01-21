@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2
 import os
 import sys
 import re
@@ -8,7 +8,7 @@ import tempfile
 from killableprocess import *
 from multiprocessing import *
 
-PYEXE = "python"
+PYEXE = "python2"
 
 # Fix path of script to be absolute.
 sys.argv[0] = os.path.abspath(sys.argv[0])
