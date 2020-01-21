@@ -44,7 +44,7 @@ def geno_to_code(g):
   elif g == '11':
     return 2
   else:
-    raise Exception, "Error: genotypes from VCF have more than 4 possible states (more than 2 ordered alleles.)"
+    raise Exception, "Error: genotypes from VCF have more than 4 possible states (more than 2 ordered alleles.), bad genotype was: {}".format(str(g))
 
 def haplo_to_code(g):
   if g[1] != "|":
