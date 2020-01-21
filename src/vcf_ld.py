@@ -100,6 +100,7 @@ def ld_rsquare_indexsnp_vcf(index_pos,vcf_file,region,tabix_path="tabix",ignore_
     # If we're here, either: 
     # 1) the index SNP was not biallelic, or
     # 2) the index SNP had genotypes that were not phased
+    print >> sys.stderr, "Error: while parsing reference variant {}, an invalid genotype was found".format(index_chrpos)
     print >> sys.stderr, e.message
     return None
 
