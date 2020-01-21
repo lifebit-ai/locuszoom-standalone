@@ -93,7 +93,24 @@ def ld_rsquare_indexsnp_vcf(index_pos,vcf_file,region,tabix_path="tabix",ignore_
     print >> sys.stderr, "Error: while calculating LD from VCF file: tabix generated an error: \n%s" % stderr
     return
 
-  index_rec = stdout.rstrip().split("\t")
+  records = stdout.split("\n")
+  index_rec = None
+  str_pos = str(index_pos)
+  for line in records:
+    if line == '':
+      continue
+
+    ls = line.split("\t")
+    if ls[1] == str_pos:
+      if index_rec is not None:
+        chosen_var = "{0}:{1}_{3}/{4}_{2}".format(*index_rec)
+        print >> sys.stderr, "Warning: multiple reference variants start at the same position, using the first one encountered in the file: {}".format(chosen_var)
+      else:
+        index_rec = ls
+
+  if index_rec is None:
+    raise Exception, "Error: could not find record in VCF for reference variant {}".format(index_chrpos)
+
   try:
     index_gts = map(geno_to_code,index_rec[9:])
   except Exception as e:
