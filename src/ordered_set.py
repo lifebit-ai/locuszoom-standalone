@@ -1,3 +1,5 @@
+#!/usr/bin/env python2.7
+
 """
 An OrderedSet is a custom MutableSet that remembers its order, so that every
 entry has an index that can be looked up.
